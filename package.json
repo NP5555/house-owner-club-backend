@@ -6,6 +6,9 @@
   "private": true,
   "license": "MIT",
   "scripts": {
+    "start": "cross-env NODE_OPTIONS='--max-old-space-size=2048' ts-node dist/src/main.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "postbuild": "copyfiles --up 1 src/**/*.json dist",
     "build:prod": "tsc -p tsconfig.build.json",
     "postbuild:prod": "copyfiles --up 1 src/**/*.json dist",
     "start:hmr": "node dist/main.hmr.ts",
