@@ -61,19 +61,29 @@ export class ApiConfigService {
     
     // Add SSL parameters for production
     if (this.nodeEnv === 'production') {
-      return `${url}?sslmode=require`;
+      return `${url}?ssl=true&sslmode=require`;
     }
     
     return url;
   }
 
   get postgresConfig(): TypeOrmModuleOptions {
-    return {
-      type: 'postgres',
+    const baseConfig = {
+      type: 'postgres' as const,
       url: this.getDatabaseUrl(),
-      // Remove individual connection parameters since we're using URL
-      ssl: this.nodeEnv === 'production',
     };
+
+    if (this.nodeEnv === 'production') {
+      return {
+        ...baseConfig,
+        ssl: {
+          rejectUnauthorized: false,
+          require: true
+        },
+      };
+    }
+
+    return baseConfig;
   }
 
   get awsS3Config() {

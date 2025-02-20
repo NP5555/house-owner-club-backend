@@ -93,6 +93,11 @@ import { SharedModule } from "./shared/shared.module";
         ],
         keepConnectionAlive: false,
         logging: ['error', 'warn'],
+        extra: {
+          ssl: configService.nodeEnv === 'production' ? {
+            rejectUnauthorized: false,
+          } : false
+        }
       }),
       inject: [ApiConfigService],
       dataSourceFactory: async (options) => {
