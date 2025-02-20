@@ -2,7 +2,7 @@ import "./boilerplate.polyfill";
 
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
-import { TypeOrmModule } from "@nestjs/typeorm";
+import { TypeOrmModule, TypeOrmModuleOptions } from "@nestjs/typeorm";
 import { AcceptLanguageResolver, I18nModule, QueryResolver } from "nestjs-i18n";
 import path from "path";
 import { DataSource } from "typeorm";
@@ -67,11 +67,12 @@ import { SharedModule } from "./shared/shared.module";
     }),
     TypeOrmModule.forRootAsync({
       imports: [SharedModule],
-      useFactory: (configService: ApiConfigService) => {
+      useFactory: (configService: ApiConfigService): TypeOrmModuleOptions => {
         const postgresConfig = configService.postgresConfig;
 
         return {
           ...postgresConfig,
+          ssl: false,
           entities: [
             UserEntity,
             UserSettingsEntity,
@@ -91,15 +92,17 @@ import { SharedModule } from "./shared/shared.module";
             RentEntity,
             NewsletterEtity
           ],
+          keepConnectionAlive: false,
+          logging: ['error', 'warn'],
         };
       },
       inject: [ApiConfigService],
-      async dataSourceFactory(options) {
+      dataSourceFactory: async (options) => {
         if (!options) {
           throw new Error("Invalid options passed");
         }
-
-        return await addTransactionalDataSource(new DataSource(options));
+        const dataSource = new DataSource(options);
+        return addTransactionalDataSource(await dataSource.initialize());
       },
     }),
     I18nModule.forRootAsync({
@@ -110,8 +113,8 @@ import { SharedModule } from "./shared/shared.module";
           watch: configService.isDevelopment,
         },
         resolvers: [
-          { use: QueryResolver, options: ["lang"] },
-          AcceptLanguageResolver,
+          new QueryResolver(['lang']),
+          new AcceptLanguageResolver(),
         ],
       }),
       imports: [SharedModule],

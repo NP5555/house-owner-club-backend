@@ -64,11 +64,11 @@ async function bootstrap() {
     if (!configService.isDevelopment) {
         app.enableShutdownHooks();
     }
-    const port = process.env.PORT || configService.appConfig.port;
+    const port = process.env.PORT || 3000;
     await app.listen(port);
-    console.info(`server running on ${await app.getUrl()}`);
+    console.log(`🚀 Application is running on: http://localhost:${port}`);
     return app;
 }
 exports.bootstrap = bootstrap;
 void bootstrap();
-// # sourceMappingURL=main.js.map
+//# sourceMappingURL=main.js.map

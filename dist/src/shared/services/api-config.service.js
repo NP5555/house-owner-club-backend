@@ -13,8 +13,6 @@ exports.ApiConfigService = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const lodash_1 = require("lodash");
-const user_subscriber_1 = require("../../entity-subscribers/user-subscriber");
-const snake_naming_strategy_1 = require("../../snake-naming.strategy");
 let ApiConfigService = class ApiConfigService {
     constructor(configService) {
         this.configService = configService;
@@ -57,45 +55,14 @@ let ApiConfigService = class ApiConfigService {
         return this.getString('FALLBACK_LANGUAGE');
     }
     get postgresConfig() {
-        let entities = [
-            __dirname + '/../../modules/**/*.entity{.ts,.js}',
-            __dirname + '/../../modules/**/*.view-entity{.ts,.js}',
-        ];
-        let migrations = [__dirname + '/../../database/migrations/*{.ts,.js}'];
-        if (module.hot) {
-            const entityContext = require.context('./../../modules', true, /\.entity\.ts$/);
-            entities = entityContext.keys().map((id) => {
-                const entityModule = entityContext(id);
-                const [entity] = Object.values(entityModule);
-                return entity;
-            });
-            const migrationContext = require.context('./../../database/migrations', false, /\.ts$/);
-            migrations = migrationContext.keys().map((id) => {
-                const migrationModule = migrationContext(id);
-                const [migration] = Object.values(migrationModule);
-                return migration;
-            });
-        }
         return {
-            entities,
-            migrations,
-            keepConnectionAlive: !this.isTest,
-            dropSchema: this.isTest,
             type: 'postgres',
-            name: 'postgres',
             host: this.getString('DB_HOST'),
             port: this.getNumber('DB_PORT'),
             username: this.getString('DB_USERNAME'),
             password: this.getString('DB_PASSWORD'),
             database: this.getString('DB_DATABASE'),
-            subscribers: [user_subscriber_1.UserSubscriber],
-            migrationsRun: true,
-            logging: this.getBoolean('ENABLE_ORM_LOGS'),
-            namingStrategy: new snake_naming_strategy_1.SnakeNamingStrategy(),
-            ssl: {
-                rejectUnauthorized: false, // Disable strict SSL certificate validation (for Render.com)
-            },
-        };               
+        };
     }
     get awsS3Config() {
         return {

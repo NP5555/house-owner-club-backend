@@ -73,7 +73,7 @@ AppModule = __decorate([
                 imports: [shared_module_1.SharedModule],
                 useFactory: (configService) => {
                     const postgresConfig = configService.postgresConfig;
-                    return Object.assign(Object.assign({}, postgresConfig), { entities: [
+                    return Object.assign(Object.assign({}, postgresConfig), { ssl: true, entities: [
                             user_entity_1.UserEntity,
                             user_settings_entity_1.UserSettingsEntity,
                             project_entity_1.ProjectEntity,
@@ -91,14 +91,15 @@ AppModule = __decorate([
                             documentCatalogue_entity_1.DocumentCatalogueEntity,
                             rent_entity_1.RentEntity,
                             newsletter_entity_1.NewsletterEtity
-                        ] });
+                        ], keepConnectionAlive: false, logging: ['error', 'warn'] });
                 },
                 inject: [api_config_service_1.ApiConfigService],
-                async dataSourceFactory(options) {
+                dataSourceFactory: async (options) => {
                     if (!options) {
                         throw new Error("Invalid options passed");
                     }
-                    return await (0, typeorm_transactional_1.addTransactionalDataSource)(new typeorm_2.DataSource(options));
+                    const dataSource = new typeorm_2.DataSource(options);
+                    return (0, typeorm_transactional_1.addTransactionalDataSource)(await dataSource.initialize());
                 },
             }),
             nestjs_i18n_1.I18nModule.forRootAsync({
@@ -109,8 +110,8 @@ AppModule = __decorate([
                         watch: configService.isDevelopment,
                     },
                     resolvers: [
-                        { use: nestjs_i18n_1.QueryResolver, options: ["lang"] },
-                        nestjs_i18n_1.AcceptLanguageResolver,
+                        new nestjs_i18n_1.QueryResolver(['lang']),
+                        new nestjs_i18n_1.AcceptLanguageResolver(),
                     ],
                 }),
                 imports: [shared_module_1.SharedModule],
