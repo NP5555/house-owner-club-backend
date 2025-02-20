@@ -56,14 +56,23 @@ export class ApiConfigService {
     return this.getString('FALLBACK_LANGUAGE');
   }
 
+  private getDatabaseUrl(): string {
+    const url = `postgresql://${this.getString('DB_USERNAME')}:${this.getString('DB_PASSWORD')}@${this.getString('DB_HOST')}:${this.getNumber('DB_PORT')}/${this.getString('DB_DATABASE')}`;
+    
+    // Add SSL parameters for production
+    if (this.nodeEnv === 'production') {
+      return `${url}?sslmode=require`;
+    }
+    
+    return url;
+  }
+
   get postgresConfig(): TypeOrmModuleOptions {
     return {
       type: 'postgres',
-      host: this.getString('DB_HOST'),
-      port: this.getNumber('DB_PORT'),
-      username: this.getString('DB_USERNAME'),
-      password: this.getString('DB_PASSWORD'),
-      database: this.getString('DB_DATABASE'),
+      url: this.getDatabaseUrl(),
+      // Remove individual connection parameters since we're using URL
+      ssl: this.nodeEnv === 'production',
     };
   }
 

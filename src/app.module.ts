@@ -65,37 +65,35 @@ import { SharedModule } from "./shared/shared.module";
       isGlobal: true,
       envFilePath: ".env",
     }),
+
+
+
     TypeOrmModule.forRootAsync({
       imports: [SharedModule],
-      useFactory: (configService: ApiConfigService): TypeOrmModuleOptions => {
-        const postgresConfig = configService.postgresConfig;
-
-        return {
-          ...postgresConfig,
-          ssl: false,
-          entities: [
-            UserEntity,
-            UserSettingsEntity,
-            ProjectEntity,
-            TransactionEntity,
-            CategoryEntity,
-            AreaEntity,
-            CurrencyEntity,
-            UserKYCEntity,
-            TypeEntity,
-            AgentLandEntity,
-            BuyEntity,
-            TradeEntity,
-            DocumentEntity,
-            RequestDocumentEntity,
-            DocumentCatalogueEntity,
-            RentEntity,
-            NewsletterEtity
-          ],
-          keepConnectionAlive: false,
-          logging: ['error', 'warn'],
-        };
-      },
+      useFactory: (configService: ApiConfigService): TypeOrmModuleOptions => ({
+        ...configService.postgresConfig,
+        entities: [
+          UserEntity,
+          UserSettingsEntity,
+          ProjectEntity,
+          TransactionEntity,
+          CategoryEntity,
+          AreaEntity,
+          CurrencyEntity,
+          UserKYCEntity,
+          TypeEntity,
+          AgentLandEntity,
+          BuyEntity,
+          TradeEntity,
+          DocumentEntity,
+          RequestDocumentEntity,
+          DocumentCatalogueEntity,
+          RentEntity,
+          NewsletterEtity
+        ],
+        keepConnectionAlive: false,
+        logging: ['error', 'warn'],
+      }),
       inject: [ApiConfigService],
       dataSourceFactory: async (options) => {
         if (!options) {
@@ -105,6 +103,8 @@ import { SharedModule } from "./shared/shared.module";
         return addTransactionalDataSource(await dataSource.initialize());
       },
     }),
+
+
     I18nModule.forRootAsync({
       useFactory: (configService: ApiConfigService) => ({
         fallbackLanguage: configService.fallbackLanguage,
