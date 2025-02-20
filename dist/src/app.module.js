@@ -133,9 +133,9 @@ AppModule = __decorate([
             documentCatalogue_module_1.DocumentCatalogueModule,
             rent_module_1.RentModule,
             newsletter_module_1.NewsletterModule,
-            // serve_static_1.ServeStaticModule.forRoot({
-            //     rootPath: (0, path_2.join)(__dirname, '..', ''),
-            // }),
+            serve_static_1.ServeStaticModule.forRoot({
+                rootPath: (0, path_2.join)(__dirname, '..', ''),
+            }),
         ],
         providers: [],
     })
