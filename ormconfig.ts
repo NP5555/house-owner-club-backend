@@ -1,3 +1,4 @@
+dotenv.config();
 import "./src/boilerplate.polyfill";
 
 import dotenv from "dotenv";
@@ -6,7 +7,6 @@ import { DataSource } from "typeorm";
 import { UserSubscriber } from "./src/entity-subscribers/user-subscriber";
 import { SnakeNamingStrategy } from "./src/snake-naming.strategy";
 
-dotenv.config();
 
 export const dataSource = new DataSource({
   type: "postgres",
@@ -15,6 +15,7 @@ export const dataSource = new DataSource({
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
+  name: "migrations",
   namingStrategy: new SnakeNamingStrategy(),
   subscribers: [UserSubscriber],
   entities: [
@@ -23,4 +24,5 @@ export const dataSource = new DataSource({
   ],
   migrations: [__dirname + "/src/database/migrations/*{.ts,.js}"],
   synchronize: true,
+  ssl: false,
 });

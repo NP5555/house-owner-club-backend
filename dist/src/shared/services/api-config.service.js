@@ -92,7 +92,10 @@ let ApiConfigService = class ApiConfigService {
             migrationsRun: true,
             logging: this.getBoolean('ENABLE_ORM_LOGS'),
             namingStrategy: new snake_naming_strategy_1.SnakeNamingStrategy(),
-        };
+            ssl: {
+                rejectUnauthorized: false, // Disable strict SSL certificate validation (for Render.com)
+            },
+        };               
     }
     get awsS3Config() {
         return {
