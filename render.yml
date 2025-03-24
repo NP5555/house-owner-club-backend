@@ -7,11 +7,15 @@ services:
     startCommand: npm run start:prod
     healthCheckPath: /api/health/ping
     autoDeploy: true
+    disk:
+      name: hoc-data
+      mountPath: /data
+      sizeGB: 1
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 3001
+        value: 10000
       - key: FALLBACK_LANGUAGE
         value: en_US
       - key: DB_TYPE
@@ -30,3 +34,5 @@ services:
         value: "true"
       - key: JWT_EXPIRATION_TIME
         value: 3600
+      - key: ENABLE_DOCUMENTATION
+        value: "true"

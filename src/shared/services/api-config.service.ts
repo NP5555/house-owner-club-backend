@@ -91,10 +91,11 @@ export class ApiConfigService {
     if (this.nodeEnv === 'production') {
       return {
         ...baseConfig,
-        ssl: {
-          rejectUnauthorized: false
-        },
+        ssl: true,
         extra: {
+          ssl: {
+            rejectUnauthorized: false
+          },
           max: 20,
           connectionTimeoutMillis: 10000,
           idleTimeoutMillis: 30000,

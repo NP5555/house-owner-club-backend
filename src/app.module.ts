@@ -94,9 +94,12 @@ import { SharedModule } from "./shared/shared.module";
         keepConnectionAlive: true,
         logging: ['error', 'warn'] as any,
         synchronize: true,
-        ssl: configService.nodeEnv === 'production' ? {
-          rejectUnauthorized: false
-        } : undefined,
+        ssl: configService.nodeEnv === 'production',
+        extra: {
+          ssl: configService.nodeEnv === 'production' ? {
+            rejectUnauthorized: false
+          } : undefined
+        },
         retryAttempts: 10,
         retryDelay: 3000
       }),
