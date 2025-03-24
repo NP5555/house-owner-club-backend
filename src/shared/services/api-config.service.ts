@@ -61,7 +61,7 @@ export class ApiConfigService {
     
     // Add SSL parameters for production
     if (this.nodeEnv === 'production') {
-      return `${url}?ssl=true&sslmode=require`;
+      return `${url}?sslmode=require`;
     }
     
     return url;
@@ -84,9 +84,14 @@ export class ApiConfigService {
       migrations,
       migrationsRun: true,
       synchronize: true,
-      logging: true,
+      logging: this.nodeEnv === 'production' ? ['error', 'warn'] : true,
       namingStrategy: new SnakeNamingStrategy(),
       subscribers: [UserSubscriber],
+      connectTimeoutMS: 10000,
+      maxQueryExecutionTime: 10000,
+      poolSize: 5,
+      retryAttempts: 10,
+      retryDelay: 3000,
     };
 
     if (this.nodeEnv === 'production') {
