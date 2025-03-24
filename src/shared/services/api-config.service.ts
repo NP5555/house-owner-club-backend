@@ -77,34 +77,38 @@ export class ApiConfigService {
       __dirname + '/../../database/migrations/*{.ts,.js}',
     ];
 
-    const baseConfig = {
-      type: 'postgres' as const,
+    const baseConfig: TypeOrmModuleOptions = {
+      type: 'postgres',
       url: this.getDatabaseUrl(),
       entities,
       migrations,
       migrationsRun: true,
       synchronize: true,
-      logging: this.nodeEnv === 'production' ? ['error', 'warn'] : true,
+      logging: this.nodeEnv === 'production' ? ['error', 'warn'] as any : true,
       namingStrategy: new SnakeNamingStrategy(),
       subscribers: [UserSubscriber],
-      connectTimeoutMS: 10000,
-      maxQueryExecutionTime: 10000,
-      poolSize: 5,
-      retryAttempts: 10,
-      retryDelay: 3000,
     };
 
     if (this.nodeEnv === 'production') {
       return {
         ...baseConfig,
         ssl: {
-          rejectUnauthorized: false,
-          require: true
+          rejectUnauthorized: false
         },
+        retryAttempts: 10,
+        retryDelay: 3000,
+        connectTimeoutMS: 10000,
+        maxQueryExecutionTime: 10000,
       };
     }
 
-    return baseConfig;
+    return {
+      ...baseConfig,
+      retryAttempts: 10,
+      retryDelay: 3000,
+      connectTimeoutMS: 10000,
+      maxQueryExecutionTime: 10000,
+    };
   }
 
   get awsS3Config() {

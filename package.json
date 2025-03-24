@@ -10,7 +10,7 @@
     "build": "tsc -p tsconfig.build.json",
     "postbuild": "copyfiles --up 1 src/**/*.json dist",
     "build:prod": "tsc -p tsconfig.build.json",
-    "postbuild:prod": "copyfiles --up 1 src/**/*.json dist",
+    "postbuild:prod": "copyfiles --up 1 src/**/*.json dist && copyfiles -u 1 src/i18n/**/* dist/i18n",
     "start:hmr": "node dist/main.hmr.ts",
     "start:dev": "cross-env NODE_OPTIONS='--max-old-space-size=1024' ts-node src/main.ts",
     "start:prod": "cross-env NODE_OPTIONS='--max-old-space-size=1024' node dist/src/main.js",

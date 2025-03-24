@@ -92,7 +92,7 @@ import { SharedModule } from "./shared/shared.module";
           NewsletterEtity
         ],
         keepConnectionAlive: false,
-        logging: ['error', 'warn', 'query'],
+        logging: ['error', 'warn', 'query'] as any,
         synchronize: true,
         extra: {
           ssl: configService.nodeEnv === 'production' ? {
