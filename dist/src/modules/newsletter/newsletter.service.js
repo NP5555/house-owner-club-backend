@@ -39,19 +39,37 @@ let NewsletterService = class NewsletterService extends abstract_service_1.Abstr
     }
     async sendNews(sendNews) {
         console.log("🚀 ~ file: newsletter.service.ts:43 ~ NewsletterService ~ sendNews ~ sendNews:", sendNews);
-        const queryBuilder = this.newsletterEntityRepository.createQueryBuilder("newsletter");
-        const subscribers = await queryBuilder.getMany();
-        const emails = subscribers.map((sub) => sub.email);
-        await this.mailerService.sendMail({
-            to: emails,
-            from: '"noreply" <hello@hoc.com>',
-            subject: "Home Owners club - Newsletter",
-            template: "../../../templates/transactional.hbs",
-            context: {
-                sendNews: sendNews.news,
-            },
-        });
-        return emails;
+        try {
+            const queryBuilder = this.newsletterEntityRepository.createQueryBuilder("newsletter");
+            const subscribers = await queryBuilder.getMany();
+            if (!subscribers || subscribers.length === 0) {
+                console.log("No subscribers found to send newsletter to");
+                return { message: "No subscribers found" };
+            }
+            const emails = subscribers.map((sub) => sub.email);
+            console.log(`Attempting to send newsletter to ${emails.length} subscribers`);
+            try {
+                await this.mailerService.sendMail({
+                    to: emails,
+                    from: '"noreply" <hello@hoc.com>',
+                    subject: "Home Owners club - Newsletter",
+                    template: "./transactional.hbs",
+                    context: {
+                        sendNews: sendNews.news,
+                    },
+                });
+                console.log("Newsletter sent successfully");
+                return { success: true, recipients: emails.length };
+            }
+            catch (emailError) {
+                console.error("Error sending email:", emailError);
+                throw new common_1.HttpException(`Failed to send email: ${emailError.message}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+        catch (error) {
+            console.error("Error in newsletter service:", error);
+            throw new common_1.HttpException(`Newsletter service error: ${error.message}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
     async getAllEmails(pageOptionsDto) {
         const queryBuilder = this.newsletterEntityRepository.createQueryBuilder("newsletter");

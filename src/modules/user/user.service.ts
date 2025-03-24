@@ -107,37 +107,68 @@ export class UserService {
   }
 
   async createDeveloper(userRegisterDto: UserRegisterDto): Promise<UserEntity> {
-    const user = this.userRepository.create(userRegisterDto);
-
-    await this.mailerService.sendMail({
-        to: user.email,
-        from: '"noreply" <hello@hoc.com>',
-        subject: "Home Owners club",
-        template: "../../../templates/registration.hbs",
-        context: {
-          email: user.email,
-          password: user.password,
-          role: user.role,
-          pubkey: user.wallet,
-        },
-      });
-
-    user.referralCode = this.generateReferralCode();
-    if (userRegisterDto.code) {
-      const queryBuilder = this.userRepository
-        .createQueryBuilder("u")
-        .where("u.referralCode = :code", { code: userRegisterDto.code });
-
-      const referralUser = await queryBuilder.getOne();
-
-      if (referralUser) {
-        user.referredBy = referralUser.id;
+    try {
+      console.log('Creating developer/agent with data:', userRegisterDto);
+      
+      // Create user entity from the DTO
+      const user = this.userRepository.create(userRegisterDto);
+      
+      // Set default values for required fields if not provided
+      if (!user.role) {
+        console.log('Role not provided, using default');
+        user.role = RoleType.DEVELOPER;
       }
+      
+      console.log(`Setting up user with role: ${user.role}`);
+      
+      // Generate referral code
+      user.referralCode = this.generateReferralCode();
+      
+      // Process referral code if provided
+      if (userRegisterDto.code) {
+        try {
+          const queryBuilder = this.userRepository
+            .createQueryBuilder("u")
+            .where("u.referralCode = :code", { code: userRegisterDto.code });
+
+          const referralUser = await queryBuilder.getOne();
+
+          if (referralUser) {
+            user.referredBy = referralUser.id;
+          }
+        } catch (error) {
+          console.error('Error processing referral code:', error);
+          // Continue without referral rather than failing the whole request
+        }
+      }
+      
+      // Save the user first to get an ID
+      await this.userRepository.save(user);
+      
+      // Try to send email, but don't fail if email sending fails
+      try {
+        // Use a simpler email setup to avoid errors with email transport
+        await this.mailerService.sendMail({
+          to: user.email,
+          from: `"noreply" <${process.env.MAIL_FROM || 'hello@hoc.com'}>`,
+          subject: "Home Owners club",
+          text: `Welcome to Home Owners Club!\n\nYour account has been created with the following details:\nEmail: ${user.email}\nRole: ${user.role}\n\nThank you for joining us.`,
+        });
+        console.log('Registration email sent successfully');
+      } catch (emailError) {
+        console.error('Failed to send registration email:', emailError);
+        // Continue without failing the whole registration process
+      }
+      
+      console.log('User created successfully:', user.id);
+      return user;
+    } catch (error) {
+      console.error('Error in createDeveloper:', error);
+      throw new HttpException(
+        `Failed to create user: ${error.message || 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
-
-    await this.userRepository.save(user);
-
-    return user;
   }
 
   async getUsersReferredBy(

@@ -50,17 +50,40 @@ let AuthService = class AuthService {
         });
     }
     async createAccessTokenOTP(data) {
-        const token = new TokenPayloadDto_1.TokenPayloadDto({
-            expiresIn: this.configService.authConfig.jwtExpirationTime,
-            accessToken: await this.jwtService.signAsync({
-                userId: data.userId,
-                type: constants_1.TokenType.OTP_ACCESS_TOKEN,
-                role: data.role,
-            }),
-        });
-        const otp = Math.floor(100000 + Math.random() * 900000);
-        await this.userService.updateOTP(data.user.id, otp);
-        return token;
+        try {
+            const token = new TokenPayloadDto_1.TokenPayloadDto({
+                expiresIn: this.configService.authConfig.jwtExpirationTime,
+                accessToken: await this.jwtService.signAsync({
+                    userId: data.userId,
+                    type: constants_1.TokenType.OTP_ACCESS_TOKEN,
+                    role: data.role,
+                }),
+            });
+            const otp = Math.floor(100000 + Math.random() * 900000);
+            console.log(`Generated OTP for user ${data.userId}: ${otp} (remove in production)`);
+            await this.userService.updateOTP(data.user.id, otp);
+            try {
+                await this.mailerService.sendMail({
+                    to: data.user.email,
+                    from: `"noreply" <${process.env.MAIL_FROM || 'hello@hoc.com'}>`,
+                    subject: "Home Owners Club - Your OTP Code",
+                    template: "../../templates/otp.hbs",
+                    context: {
+                        email: data.user.email,
+                        OTP: otp,
+                    },
+                });
+                console.log(`OTP email sent to ${data.user.email}`);
+            }
+            catch (error) {
+                console.error('Failed to send OTP email:', error);
+            }
+            return token;
+        }
+        catch (error) {
+            console.error('Error in createAccessTokenOTP:', error);
+            throw error;
+        }
     }
     async validateUser(userLoginDto) {
         const user = await this.userService.findOne({

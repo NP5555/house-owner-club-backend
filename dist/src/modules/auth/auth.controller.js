@@ -58,11 +58,31 @@ let AuthController = class AuthController {
             isActive: true,
         });
     }
-    async developerRegister(userRegisterDto) {
-        const createdUser = await this.userService.createDeveloper(userRegisterDto);
-        return createdUser.toDto({
-            isActive: true,
-        });
+    async developerRegister(userRegisterDto, res) {
+        try {
+            console.log('Developer registration request received:', userRegisterDto);
+            if (!userRegisterDto.email || !userRegisterDto.password) {
+                return res.status(common_1.HttpStatus.BAD_REQUEST).json({
+                    statusCode: common_1.HttpStatus.BAD_REQUEST,
+                    message: 'Email and password are required fields',
+                });
+            }
+            const createdUser = await this.userService.createDeveloper(userRegisterDto);
+            return res.status(common_1.HttpStatus.OK).json({
+                statusCode: common_1.HttpStatus.OK,
+                message: 'User successfully registered',
+                data: createdUser.toDto({
+                    isActive: true,
+                }),
+            });
+        }
+        catch (error) {
+            console.error('Error in developer registration:', error);
+            return res.status(common_1.HttpStatus.INTERNAL_SERVER_ERROR).json({
+                statusCode: common_1.HttpStatus.INTERNAL_SERVER_ERROR,
+                message: error.message || 'Internal server error during registration',
+            });
+        }
     }
     getCurrentUser(user) {
         return user.toDto();
@@ -120,8 +140,9 @@ __decorate([
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, swagger_1.ApiOkResponse)({ type: user_dto_1.UserDto, description: "Successfully Registered" }),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Res)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [UserRegisterDto_1.UserRegisterDto]),
+    __metadata("design:paramtypes", [UserRegisterDto_1.UserRegisterDto, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "developerRegister", null);
 __decorate([

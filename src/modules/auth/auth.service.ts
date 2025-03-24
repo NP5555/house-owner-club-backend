@@ -42,29 +42,43 @@ export class AuthService {
     userId: Uuid;
     user: any;
   }): Promise<TokenPayloadDto | any> {
-    const token = new TokenPayloadDto({
-      expiresIn: this.configService.authConfig.jwtExpirationTime,
-      accessToken: await this.jwtService.signAsync({
-        userId: data.userId,
-        type: TokenType.OTP_ACCESS_TOKEN,
-        role: data.role,
-      }),
-    });
-    const otp = Math.floor(100000 + Math.random() * 900000);
-
-    await this.userService.updateOTP(data.user.id, otp);
-
-    // await this.mailerService.sendMail({
-    //   to: data.user.email,
-    //   from: '"noreply" <hello@hoc.com>',
-    //   subject: "Home Owners club",
-    //   template: "../../../templates/otp.hbs",
-    //   context: {
-    //     email: data.user.email,
-    //     OTP: otp,
-    //   },
-    // });
-    return token;
+    try {
+      const token = new TokenPayloadDto({
+        expiresIn: this.configService.authConfig.jwtExpirationTime,
+        accessToken: await this.jwtService.signAsync({
+          userId: data.userId,
+          type: TokenType.OTP_ACCESS_TOKEN,
+          role: data.role,
+        }),
+      });
+      
+      // Generate OTP
+      const otp = Math.floor(100000 + Math.random() * 900000);
+      console.log(`Generated OTP for user ${data.userId}: ${otp} (remove in production)`);
+      
+      // Update user's OTP
+      await this.userService.updateOTP(data.user.id, otp);
+      
+      // Try to send email with OTP
+      try {
+        // Use a simpler email setup without templates to avoid errors
+        await this.mailerService.sendMail({
+          to: data.user.email,
+          from: `"noreply" <${process.env.MAIL_FROM || 'hello@hoc.com'}>`,
+          subject: "Home Owners Club - Your OTP Code",
+          text: `Your OTP code is: ${otp}\n\nPlease use this code to complete your login.`,
+        });
+        console.log(`OTP email sent to ${data.user.email}`);
+      } catch (error) {
+        console.error('Failed to send OTP email:', error);
+        // Continue without failing the login process
+      }
+      
+      return token;
+    } catch (error) {
+      console.error('Error in createAccessTokenOTP:', error);
+      throw error;
+    }
   }
 
   async validateUser(userLoginDto: UserLoginDto): Promise<UserEntity> {

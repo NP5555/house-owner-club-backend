@@ -100,13 +100,57 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: UserDto, description: "Successfully Registered" })
   async developerRegister(
-    @Body() userRegisterDto: UserRegisterDto
-  ): Promise<UserDto> {
-    const createdUser = await this.userService.createDeveloper(userRegisterDto);
-
-    return createdUser.toDto({
-      isActive: true,
-    });
+    @Body() userRegisterDto: UserRegisterDto,
+    @Res() res: any
+  ): Promise<any> {
+    try {
+      console.log('Developer registration request received with payload:', JSON.stringify(userRegisterDto));
+      
+      // Validate required fields
+      if (!userRegisterDto.email || !userRegisterDto.password) {
+        return res.status(HttpStatus.BAD_REQUEST).json({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: 'Email and password are required fields',
+        });
+      }
+      
+      // Validate role if provided (AGENT or DEVELOPER)
+      if (userRegisterDto.role && 
+          userRegisterDto.role !== RoleType.AGENT && 
+          userRegisterDto.role !== RoleType.DEVELOPER) {
+        return res.status(HttpStatus.BAD_REQUEST).json({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: 'Invalid role. Role must be either AGENT or DEVELOPER',
+        });
+      }
+      
+      // Set default role if not provided
+      if (!userRegisterDto.role) {
+        userRegisterDto.role = RoleType.DEVELOPER;
+      }
+      
+      console.log(`Attempting to create ${userRegisterDto.role} with email: ${userRegisterDto.email}`);
+      
+      const createdUser = await this.userService.createDeveloper(userRegisterDto);
+      console.log('User created successfully:', createdUser.id);
+      
+      return res.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: `${userRegisterDto.role} successfully registered`,
+        data: createdUser.toDto({
+          isActive: true,
+        }),
+      });
+    } catch (error) {
+      console.error('Error in developer registration:', error);
+      console.error('Error details:', error.stack);
+      
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: error.message || 'Internal server error during registration',
+        error: error.stack,
+      });
+    }
   }
 
   @Version("1")

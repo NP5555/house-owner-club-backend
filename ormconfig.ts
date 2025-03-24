@@ -24,5 +24,6 @@ export const dataSource = new DataSource({
   ],
   migrations: [__dirname + "/src/database/migrations/*{.ts,.js}"],
   synchronize: true,
+  logging: true,
   ssl: false,
 });

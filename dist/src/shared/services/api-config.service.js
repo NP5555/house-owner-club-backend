@@ -13,6 +13,8 @@ exports.ApiConfigService = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const lodash_1 = require("lodash");
+const user_subscriber_1 = require("../../entity-subscribers/user-subscriber");
+const snake_naming_strategy_1 = require("../../snake-naming.strategy");
 let ApiConfigService = class ApiConfigService {
     constructor(configService) {
         this.configService = configService;
@@ -62,9 +64,23 @@ let ApiConfigService = class ApiConfigService {
         return url;
     }
     get postgresConfig() {
+        const entities = [
+            __dirname + '/../../modules/**/*.entity{.ts,.js}',
+            __dirname + '/../../modules/**/*.view-entity{.ts,.js}',
+        ];
+        const migrations = [
+            __dirname + '/../../database/migrations/*{.ts,.js}',
+        ];
         const baseConfig = {
             type: 'postgres',
             url: this.getDatabaseUrl(),
+            entities,
+            migrations,
+            migrationsRun: true,
+            synchronize: true,
+            logging: true,
+            namingStrategy: new snake_naming_strategy_1.SnakeNamingStrategy(),
+            subscribers: [user_subscriber_1.UserSubscriber],
         };
         if (this.nodeEnv === 'production') {
             return Object.assign(Object.assign({}, baseConfig), { ssl: {

@@ -39,21 +39,21 @@ import { ConfigService } from '@nestjs/config';
     MailerModule.forRootAsync({
         // imports: [ConfigModule], // import module if not enabled globally
         useFactory: async (config: ConfigService) => ({
-          // transport: config.get("MAIL_TRANSPORT"),
-          // or
+          // Choose one of the transport options below
           transport: {
-            host: "smtp.gmail.com",
+            host: config.get("MAIL_HOST") || "smtp.gmail.com",
+            port: config.get("MAIL_PORT") || 587,
             secure: false,
             auth: {
-              user: "ngs.naeemashraf@gmail.com",
-              pass: "ABCDRTYU990",
+              user: config.get("MAIL_USER"),
+              pass: config.get("MAIL_PASSWORD"),
             },
           },
           defaults: {
-            from: `"No Reply" <hello@hoc.com`,
+            from: `"No Reply" <${config.get("MAIL_FROM")}>`,
           },
           template: {
-            dir: join(__dirname, "templates"),
+            dir: join(__dirname, "../../templates"),
             adapter: new HandlebarsAdapter(),
             options: {
               strict: true,

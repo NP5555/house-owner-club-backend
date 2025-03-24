@@ -68,9 +68,25 @@ export class ApiConfigService {
   }
 
   get postgresConfig(): TypeOrmModuleOptions {
+    const entities = [
+      __dirname + '/../../modules/**/*.entity{.ts,.js}',
+      __dirname + '/../../modules/**/*.view-entity{.ts,.js}',
+    ];
+
+    const migrations = [
+      __dirname + '/../../database/migrations/*{.ts,.js}',
+    ];
+
     const baseConfig = {
       type: 'postgres' as const,
       url: this.getDatabaseUrl(),
+      entities,
+      migrations,
+      migrationsRun: true,
+      synchronize: true,
+      logging: true,
+      namingStrategy: new SnakeNamingStrategy(),
+      subscribers: [UserSubscriber],
     };
 
     if (this.nodeEnv === 'production') {

@@ -89,7 +89,7 @@ AppModule = __decorate([
                         documentCatalogue_entity_1.DocumentCatalogueEntity,
                         rent_entity_1.RentEntity,
                         newsletter_entity_1.NewsletterEtity
-                    ], keepConnectionAlive: false, logging: ['error', 'warn'], extra: {
+                    ], keepConnectionAlive: false, logging: ['error', 'warn', 'query'], synchronize: true, extra: {
                         ssl: configService.nodeEnv === 'production' ? {
                             rejectUnauthorized: false,
                         } : false

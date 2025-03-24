@@ -19,6 +19,7 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const typeorm_transactional_1 = require("typeorm-transactional");
 const mailer_1 = require("@nestjs-modules/mailer");
+const constants_1 = require("../../constants");
 const exceptions_1 = require("../../exceptions");
 const aws_s3_service_1 = require("../../shared/services/aws-s3.service");
 const validator_service_1 = require("../../shared/services/validator.service");
@@ -56,31 +57,55 @@ let UserService = class UserService {
         return user;
     }
     async createDeveloper(userRegisterDto) {
-        const user = this.userRepository.create(userRegisterDto);
-        await this.mailerService.sendMail({
-            to: user.email,
-            from: '"noreply" <hello@hoc.com>',
-            subject: "Home Owners club",
-            template: "../../../templates/registration.hbs",
-            context: {
-                email: user.email,
-                password: user.password,
-                role: user.role,
-                pubkey: user.wallet,
-            },
-        });
-        user.referralCode = this.generateReferralCode();
-        if (userRegisterDto.code) {
-            const queryBuilder = this.userRepository
-                .createQueryBuilder("u")
-                .where("u.referralCode = :code", { code: userRegisterDto.code });
-            const referralUser = await queryBuilder.getOne();
-            if (referralUser) {
-                user.referredBy = referralUser.id;
+        try {
+            console.log('Creating developer/agent with data:', userRegisterDto);
+            const user = this.userRepository.create(userRegisterDto);
+            if (!user.role) {
+                console.log('Role not provided, using default');
+                user.role = constants_1.RoleType.DEVELOPER;
             }
+            console.log(`Setting up user with role: ${user.role}`);
+            user.referralCode = this.generateReferralCode();
+            if (userRegisterDto.code) {
+                try {
+                    const queryBuilder = this.userRepository
+                        .createQueryBuilder("u")
+                        .where("u.referralCode = :code", { code: userRegisterDto.code });
+                    const referralUser = await queryBuilder.getOne();
+                    if (referralUser) {
+                        user.referredBy = referralUser.id;
+                    }
+                }
+                catch (error) {
+                    console.error('Error processing referral code:', error);
+                }
+            }
+            await this.userRepository.save(user);
+            try {
+                await this.mailerService.sendMail({
+                    to: user.email,
+                    from: `"noreply" <${process.env.MAIL_FROM || 'hello@hoc.com'}>`,
+                    subject: "Home Owners club",
+                    template: "../../templates/registration.hbs",
+                    context: {
+                        email: user.email,
+                        password: user.password,
+                        role: user.role,
+                        pubkey: user.wallet,
+                    },
+                });
+                console.log('Registration email sent successfully');
+            }
+            catch (emailError) {
+                console.error('Failed to send registration email:', emailError);
+            }
+            console.log('User created successfully:', user.id);
+            return user;
         }
-        await this.userRepository.save(user);
-        return user;
+        catch (error) {
+            console.error('Error in createDeveloper:', error);
+            throw new common_1.HttpException(`Failed to create user: ${error.message || 'Unknown error'}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
     async getUsersReferredBy(pageOptionsDto, user) {
         const queryBuilder = this.userRepository
