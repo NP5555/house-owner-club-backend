@@ -24,4 +24,14 @@ export class HealthCheckerController {
       () => this.serviceIndicator.isHealthy('search-service-health'),
     ]);
   }
+
+  @Get('ping')
+  ping() {
+    return {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV,
+      service: 'house-owner-club-backend'
+    };
+  }
 }

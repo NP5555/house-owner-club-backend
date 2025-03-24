@@ -59,11 +59,7 @@ export class ApiConfigService {
   private getDatabaseUrl(): string {
     const url = `postgresql://${this.getString('DB_USERNAME')}:${this.getString('DB_PASSWORD')}@${this.getString('DB_HOST')}:${this.getNumber('DB_PORT')}/${this.getString('DB_DATABASE')}`;
     
-    // Add SSL parameters for production
-    if (this.nodeEnv === 'production') {
-      return `${url}?sslmode=require`;
-    }
-    
+    // Don't use query parameters in the URL - we'll configure SSL separately
     return url;
   }
 
@@ -87,6 +83,9 @@ export class ApiConfigService {
       logging: this.nodeEnv === 'production' ? ['error', 'warn'] as any : true,
       namingStrategy: new SnakeNamingStrategy(),
       subscribers: [UserSubscriber],
+      retryAttempts: 10,
+      retryDelay: 3000,
+      keepConnectionAlive: true,
     };
 
     if (this.nodeEnv === 'production') {
@@ -95,20 +94,15 @@ export class ApiConfigService {
         ssl: {
           rejectUnauthorized: false
         },
-        retryAttempts: 10,
-        retryDelay: 3000,
-        connectTimeoutMS: 10000,
-        maxQueryExecutionTime: 10000,
+        extra: {
+          max: 20,
+          connectionTimeoutMillis: 10000,
+          idleTimeoutMillis: 30000,
+        },
       };
     }
 
-    return {
-      ...baseConfig,
-      retryAttempts: 10,
-      retryDelay: 3000,
-      connectTimeoutMS: 10000,
-      maxQueryExecutionTime: 10000,
-    };
+    return baseConfig;
   }
 
   get awsS3Config() {

@@ -91,22 +91,28 @@ import { SharedModule } from "./shared/shared.module";
           RentEntity,
           NewsletterEtity
         ],
-        keepConnectionAlive: false,
-        logging: ['error', 'warn', 'query'] as any,
+        keepConnectionAlive: true,
+        logging: ['error', 'warn'] as any,
         synchronize: true,
-        extra: {
-          ssl: configService.nodeEnv === 'production' ? {
-            rejectUnauthorized: false,
-          } : false
-        }
+        ssl: configService.nodeEnv === 'production' ? {
+          rejectUnauthorized: false
+        } : undefined,
+        retryAttempts: 10,
+        retryDelay: 3000
       }),
       inject: [ApiConfigService],
       dataSourceFactory: async (options) => {
         if (!options) {
           throw new Error("Invalid options passed");
         }
-        const dataSource = new DataSource(options);
-        return addTransactionalDataSource(await dataSource.initialize());
+
+        try {
+          const dataSource = new DataSource(options);
+          return addTransactionalDataSource(await dataSource.initialize());
+        } catch (err) {
+          console.error('Failed to connect to the database: ', err);
+          throw err;
+        }
       },
     }),
 

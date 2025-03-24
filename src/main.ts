@@ -96,9 +96,15 @@ export async function bootstrap(): Promise<NestExpressApplication> {
     app.enableShutdownHooks();
   }
 
-  const port = process.env.PORT || 3000;
-  await app.listen(port);
-  console.log(`🚀 Application is running on: http://localhost:${port}`);
+  const port = configService.appConfig.port || process.env.PORT || 3001;
+  
+  console.log(`Server configured to listen on port: ${port}`);
+  
+  await app.listen(port, '0.0.0.0');
+  
+  console.log(`🚀 Application is running on port: ${port}`);
+  console.log(`Environment: ${configService.nodeEnv}`);
+  console.log(`Database host: ${process.env.DB_HOST}`);
 
   return app;
 }
