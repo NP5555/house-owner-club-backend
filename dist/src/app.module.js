@@ -89,25 +89,31 @@ AppModule = __decorate([
                         documentCatalogue_entity_1.DocumentCatalogueEntity,
                         rent_entity_1.RentEntity,
                         newsletter_entity_1.NewsletterEtity
-                    ], keepConnectionAlive: false, logging: ['error', 'warn', 'query'], synchronize: true, extra: {
-                        ssl: configService.nodeEnv === 'production' ? {
-                            rejectUnauthorized: false,
-                        } : false
-                    } })),
+                    ], keepConnectionAlive: true, logging: ['error', 'warn'], synchronize: true, ssl: configService.dbSsl || configService.nodeEnv === 'production', extra: {
+                        ssl: (configService.dbSsl || configService.nodeEnv === 'production') ? {
+                            rejectUnauthorized: false
+                        } : undefined
+                    }, retryAttempts: 10, retryDelay: 3000 })),
                 inject: [api_config_service_1.ApiConfigService],
                 dataSourceFactory: async (options) => {
                     if (!options) {
                         throw new Error("Invalid options passed");
                     }
-                    const dataSource = new typeorm_2.DataSource(options);
-                    return (0, typeorm_transactional_1.addTransactionalDataSource)(await dataSource.initialize());
+                    try {
+                        const dataSource = new typeorm_2.DataSource(options);
+                        return (0, typeorm_transactional_1.addTransactionalDataSource)(await dataSource.initialize());
+                    }
+                    catch (err) {
+                        console.error('Failed to connect to the database: ', err);
+                        throw err;
+                    }
                 },
             }),
             nestjs_i18n_1.I18nModule.forRootAsync({
                 useFactory: (configService) => ({
                     fallbackLanguage: configService.fallbackLanguage,
                     loaderOptions: {
-                        path: path_1.default.join(__dirname, "/i18n/"),
+                        path: path_1.default.join(__dirname, "../i18n/"),
                         watch: configService.isDevelopment,
                     },
                     resolvers: [

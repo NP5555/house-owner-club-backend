@@ -53,14 +53,14 @@ let ApiConfigService = class ApiConfigService {
     get nodeEnv() {
         return this.getString('NODE_ENV');
     }
+    get dbSsl() {
+        return this.getBoolean('DB_SSL');
+    }
     get fallbackLanguage() {
         return this.getString('FALLBACK_LANGUAGE');
     }
     getDatabaseUrl() {
         const url = `postgresql://${this.getString('DB_USERNAME')}:${this.getString('DB_PASSWORD')}@${this.getString('DB_HOST')}:${this.getNumber('DB_PORT')}/${this.getString('DB_DATABASE')}`;
-        if (this.nodeEnv === 'production') {
-            return `${url}?ssl=true&sslmode=require`;
-        }
         return url;
     }
     get postgresConfig() {
@@ -78,14 +78,16 @@ let ApiConfigService = class ApiConfigService {
             migrations,
             migrationsRun: true,
             synchronize: true,
-            logging: true,
+            logging: this.nodeEnv === 'production' ? ['error', 'warn'] : true,
             namingStrategy: new snake_naming_strategy_1.SnakeNamingStrategy(),
             subscribers: [user_subscriber_1.UserSubscriber],
+            retryAttempts: 10,
+            retryDelay: 3000,
+            keepConnectionAlive: true,
         };
-        if (this.nodeEnv === 'production') {
+        if (this.dbSsl || this.nodeEnv === 'production') {
             return Object.assign(Object.assign({}, baseConfig), { ssl: {
                     rejectUnauthorized: false,
-                    require: true
                 } });
         }
         return baseConfig;

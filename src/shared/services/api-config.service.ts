@@ -59,7 +59,11 @@ export class ApiConfigService {
   private getDatabaseUrl(): string {
     const url = `postgresql://${this.getString('DB_USERNAME')}:${this.getString('DB_PASSWORD')}@${this.getString('DB_HOST')}:${this.getNumber('DB_PORT')}/${this.getString('DB_DATABASE')}`;
     
-    // Don't use query parameters in the URL - we'll configure SSL separately
+    // Add SSL parameters for production
+    if (this.nodeEnv === 'production') {
+      return `${url}?ssl=true&sslmode=require`;
+    }
+    
     return url;
   }
 
@@ -73,32 +77,24 @@ export class ApiConfigService {
       __dirname + '/../../database/migrations/*{.ts,.js}',
     ];
 
-    const baseConfig: TypeOrmModuleOptions = {
-      type: 'postgres',
+    const baseConfig = {
+      type: 'postgres' as const,
       url: this.getDatabaseUrl(),
       entities,
       migrations,
       migrationsRun: true,
       synchronize: true,
-      logging: this.nodeEnv === 'production' ? ['error', 'warn'] as any : true,
+      logging: true,
       namingStrategy: new SnakeNamingStrategy(),
       subscribers: [UserSubscriber],
-      retryAttempts: 10,
-      retryDelay: 3000,
-      keepConnectionAlive: true,
     };
 
     if (this.nodeEnv === 'production') {
       return {
         ...baseConfig,
-        ssl: true,
-        extra: {
-          ssl: {
-            rejectUnauthorized: false
-          },
-          max: 20,
-          connectionTimeoutMillis: 10000,
-          idleTimeoutMillis: 30000,
+        ssl: {
+          rejectUnauthorized: false,
+          require: true
         },
       };
     }

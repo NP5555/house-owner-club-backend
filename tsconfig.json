@@ -17,10 +17,7 @@
     "outDir": "./dist",
     "baseUrl": "./src",
     "incremental": true,
-    "strictNullChecks": false,
-    "strictBindCallApply": false,
-    "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false
+    "strictNullChecks": true
   },
   "include": [
     "src/**/*"

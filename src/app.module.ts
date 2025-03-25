@@ -91,31 +91,22 @@ import { SharedModule } from "./shared/shared.module";
           RentEntity,
           NewsletterEtity
         ],
-        keepConnectionAlive: true,
-        logging: ['error', 'warn'] as any,
+        keepConnectionAlive: false,
+        logging: ['error', 'warn', 'query'],
         synchronize: true,
-        ssl: configService.nodeEnv === 'production',
         extra: {
           ssl: configService.nodeEnv === 'production' ? {
-            rejectUnauthorized: false
-          } : undefined
-        },
-        retryAttempts: 10,
-        retryDelay: 3000
+            rejectUnauthorized: false,
+          } : false
+        }
       }),
       inject: [ApiConfigService],
       dataSourceFactory: async (options) => {
         if (!options) {
           throw new Error("Invalid options passed");
         }
-
-        try {
-          const dataSource = new DataSource(options);
-          return addTransactionalDataSource(await dataSource.initialize());
-        } catch (err) {
-          console.error('Failed to connect to the database: ', err);
-          throw err;
-        }
+        const dataSource = new DataSource(options);
+        return addTransactionalDataSource(await dataSource.initialize());
       },
     }),
 
@@ -124,7 +115,7 @@ import { SharedModule } from "./shared/shared.module";
       useFactory: (configService: ApiConfigService) => ({
         fallbackLanguage: configService.fallbackLanguage,
         loaderOptions: {
-          path: path.join(__dirname, "../i18n/"),
+          path: path.join(__dirname, "/i18n/"),
           watch: configService.isDevelopment,
         },
         resolvers: [

@@ -86,13 +86,7 @@ let UserService = class UserService {
                     to: user.email,
                     from: `"noreply" <${process.env.MAIL_FROM || 'hello@hoc.com'}>`,
                     subject: "Home Owners club",
-                    template: "../../templates/registration.hbs",
-                    context: {
-                        email: user.email,
-                        password: user.password,
-                        role: user.role,
-                        pubkey: user.wallet,
-                    },
+                    text: `Welcome to Home Owners Club!\n\nYour account has been created with the following details:\nEmail: ${user.email}\nRole: ${user.role}\n\nThank you for joining us.`,
                 });
                 console.log('Registration email sent successfully');
             }

@@ -67,11 +67,7 @@ let AuthService = class AuthService {
                     to: data.user.email,
                     from: `"noreply" <${process.env.MAIL_FROM || 'hello@hoc.com'}>`,
                     subject: "Home Owners Club - Your OTP Code",
-                    template: "../../templates/otp.hbs",
-                    context: {
-                        email: data.user.email,
-                        OTP: otp,
-                    },
+                    text: `Your OTP code is: ${otp}\n\nPlease use this code to complete your login.`,
                 });
                 console.log(`OTP email sent to ${data.user.email}`);
             }

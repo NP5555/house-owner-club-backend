@@ -96,16 +96,9 @@ export async function bootstrap(): Promise<NestExpressApplication> {
     app.enableShutdownHooks();
   }
 
-  // Let Render decide which port to use
-  const port = process.env.PORT || 10000;
-  
-  console.log(`Server configured to listen on port: ${port}`);
-  console.log(`Database host: ${process.env.DB_HOST}`);
-  console.log(`Environment: ${process.env.NODE_ENV}`);
-  
-  await app.listen(port, '0.0.0.0');
-  
-  console.log(`🚀 Application is running on port: ${port}`);
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+  console.log(`🚀 Application is running on: http://localhost:${port}`);
 
   return app;
 }
