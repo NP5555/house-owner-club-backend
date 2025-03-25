@@ -25,14 +25,6 @@ let HealthCheckerController = class HealthCheckerController {
             () => this.serviceIndicator.isHealthy('search-service-health'),
         ]);
     }
-    ping() {
-        return {
-            status: 'ok',
-            timestamp: new Date().toISOString(),
-            environment: process.env.NODE_ENV,
-            service: 'house-owner-club-backend'
-        };
-    }
 };
 __decorate([
     (0, common_1.Get)(),
@@ -41,12 +33,6 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], HealthCheckerController.prototype, "check", null);
-__decorate([
-    (0, common_1.Get)('ping'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], HealthCheckerController.prototype, "ping", null);
 HealthCheckerController = __decorate([
     (0, common_1.Controller)('health'),
     __metadata("design:paramtypes", [terminus_1.HealthCheckService,

@@ -51,6 +51,8 @@ function explore(instance: Object, propertyKey: string | symbol) {
       return value.type;
     }
   }
+
+  return undefined;
 }
 
 function RegisterModels(): MethodDecorator {

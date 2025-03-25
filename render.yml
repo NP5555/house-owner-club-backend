@@ -2,7 +2,7 @@ services:
   - type: web
     name: home-owner-club
     env: node
-    buildCommand: npm config set husky-skip-install 1 && npm ci --no-audit --ignore-scripts && npm run render:build
+    buildCommand: chmod +x ./render-build.sh && ./render-build.sh
     startCommand: node dist/src/main.js
     envVars:
       - key: DATABASE_URL
