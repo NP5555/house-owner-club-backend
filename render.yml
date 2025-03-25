@@ -2,8 +2,8 @@ services:
   - type: web
     name: home-owner-club
     env: node
-    buildCommand: yarn install && yarn build
-    startCommand: yarn start
+    buildCommand: npm config set husky-skip-install 1 && npm ci --no-audit --ignore-scripts && npm run render:build
+    startCommand: node dist/src/main.js
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -13,3 +13,7 @@ services:
         value: production
       - key: PORT
         value: 10000
+      - key: HUSKY_SKIP_INSTALL
+        value: 1
+      - key: RENDER
+        value: true
