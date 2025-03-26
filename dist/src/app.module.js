@@ -152,6 +152,11 @@ AppModule = __decorate([
             serve_static_1.ServeStaticModule.forRoot({
                 rootPath: (0, path_2.join)(__dirname, '..', 'public'),
                 exclude: ['/api*'],
+                serveRoot: '/active',
+            }),
+            serve_static_1.ServeStaticModule.forRoot({
+                rootPath: (0, path_2.join)(__dirname, '..', 'public'),
+                exclude: ['/api*'],
                 serveRoot: '/',
             }),
         ],
