@@ -29,7 +29,13 @@ export async function bootstrap(): Promise<NestExpressApplication> {
   const app = await NestFactory.create<NestExpressApplication>(
     AppModule,
     new ExpressAdapter(),
-    { cors: true },
+    { 
+      cors: {
+        origin: ['https://myhoc.netlify.app', 'http://localhost:3000'],
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+        credentials: true,
+      }
+    },
   );
   app.setGlobalPrefix('api');
   app.enable('trust proxy'); // only if you're behind a reverse proxy (Render, Nginx, etc)
@@ -96,7 +102,7 @@ export async function bootstrap(): Promise<NestExpressApplication> {
     app.enableShutdownHooks();
   }
 
-  const port = process.env.PORT || 3000;
+  const port = process.env.PORT || 3001;
   await app.listen(port);
   console.log(`🚀 Application is running on: http://localhost:${port}`);
 

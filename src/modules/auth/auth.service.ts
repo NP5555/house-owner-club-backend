@@ -61,23 +61,46 @@ export class AuthService {
       
       // Try to send email with OTP
       try {
-        // Use a simpler email setup without templates to avoid errors
-        await this.mailerService.sendMail({
+        console.log('Attempting to send OTP email to:', data.user.email);
+        
+        const emailContent = {
           to: data.user.email,
-          from: `"noreply" <${process.env.MAIL_FROM || 'hello@hoc.com'}>`,
-          subject: "Home Owners Club - Your OTP Code",
-          text: `Your OTP code is: ${otp}\n\nPlease use this code to complete your login.`,
-        });
-        console.log(`OTP email sent to ${data.user.email}`);
+          from: '"House Owners Club" <hello@hoc.com>',
+          subject: "Your Login OTP Code - House Owners Club",
+          text: `Your OTP code is: ${otp}\n\nPlease use this code to complete your login.\n\nThis code will expire soon, please use it immediately.`,
+          html: `
+            <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
+              <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h2 style="color: #333; text-align: center;">House Owners Club</h2>
+                <h3 style="color: #444; text-align: center;">Your Login OTP Code</h3>
+                <div style="text-align: center; padding: 20px; background-color: #f8f8f8; border-radius: 5px; margin: 20px 0;">
+                  <h1 style="color: #2c3e50; font-size: 32px; margin: 0; letter-spacing: 5px;">${otp}</h1>
+                </div>
+                <p style="color: #666; text-align: center;">Please use this code to complete your login.</p>
+                <p style="color: #888; font-size: 12px; text-align: center; margin-top: 20px;">This code will expire soon, please use it immediately.</p>
+                <p style="color: #888; font-size: 12px; text-align: center;">If you didn't request this code, please ignore this email.</p>
+              </div>
+            </div>
+          `
+        };
+
+        const result = await this.mailerService.sendMail(emailContent);
+        console.log('OTP email sent successfully:', result);
+        
+        return token;
       } catch (error) {
         console.error('Failed to send OTP email:', error);
-        // Continue without failing the login process
+        throw new HttpException({
+          message: 'Failed to send OTP email',
+          error: error.message
+        }, HttpStatus.INTERNAL_SERVER_ERROR);
       }
-      
-      return token;
     } catch (error) {
       console.error('Error in createAccessTokenOTP:', error);
-      throw error;
+      throw new HttpException({
+        message: 'Error creating access token OTP',
+        error: error.message
+      }, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -99,7 +122,6 @@ export class AuthService {
   }
 
   async validateUserOTP(OTP: number, token: string): Promise< any> {
-
     if(token === 'undefined' || token === null){
         throw new HttpException(
             "Incorrect Token",
@@ -107,28 +129,27 @@ export class AuthService {
           );
     }else{
         const decodedToken: any = this.jwtService.decode(token);
-      const user = await this.userService.findOne({
-        id: decodedToken?.userId,
-      });
+        const user = await this.userService.findOne({
+          id: decodedToken?.userId,
+        });
 
-    if(OTP !== user?.otp){
-        throw new HttpException(
-            "Incorrect OTP",
-            HttpStatus.BAD_REQUEST
-          );
-    }
+        if(OTP !== user?.otp){
+            throw new HttpException(
+                "Incorrect OTP",
+                HttpStatus.BAD_REQUEST
+              );
+        }
 
-    const {
-        password,
-        referralCode,
-        referredBy,
-        avatar,
-        otp,
-        ...userData
-      } = user;
+        const {
+            password,
+            referralCode,
+            referredBy,
+            avatar,
+            otp,
+            ...userData
+          } = user;
 
-
-    return userData!;
+        return userData!;
     }
   }
 
@@ -143,7 +164,6 @@ export class AuthService {
         "Current password is incorrect",
         HttpStatus.BAD_REQUEST
       );
-      //   throw new Error('Current password is incorrect.');
     }
     const newPasswordHash = await generateHash(newPassword);
     user.password = newPasswordHash;
@@ -153,14 +173,6 @@ export class AuthService {
   async sendForgotPasswordEmail(email: string): Promise<void> {
     const user = await this.userService.findByEmail(email);
     const resetPasswordToken = uuidv4();
-    // user.resetPasswordToken = resetPasswordToken;
-    // user.resetPasswordExpires = new Date(new Date().getTime() + 30 * 60 * 1000); // Token expires in 30 minutes
-    // await this.userService.update(user);
-    // await this.mailerService.sendMail({
-    //   from: process.env.EMAIL_USERNAME,
-    //   to: email,
-    //   subject: 'Reset your password',
-    //   text: `Click on the link to reset your password: ${process.env.APP_URL}/reset-password/${resetPasswordToken}`,
-    // });
+    // Implementation pending
   }
 }

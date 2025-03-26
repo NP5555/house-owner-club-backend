@@ -28,16 +28,16 @@ export const handlers = [CreateSettingsHandler];
           secure: false,
           auth: {
             user: "ngs.naeemashraf@gmail.com",
-            pass: "ABCDRTYU990",
-},
+            pass: "gjcrjehcmiasqzoe",
+          },
           logger: true,
           debug: true
         },
         defaults: {
-          from: `"No Reply" <hello@hoc.com`,
+          from: `"No Reply" <hello@hoc.com>`,
         },
         template: {
-          dir: join(__dirname, "templates"),
+          dir: join(__dirname, "../../templates"),
           adapter: new HandlebarsAdapter(),
           options: {
             strict: true,

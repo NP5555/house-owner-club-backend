@@ -8,42 +8,35 @@ import { ConfigService } from '@nestjs/config';
 import { HandlebarsAdapter } from "@nestjs-modules/mailer/dist/adapters/handlebars.adapter";
 import { join } from "path";
 
-
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ NewsletterEtity]),
+    TypeOrmModule.forFeature([NewsletterEtity]),
     MailerModule.forRootAsync({
-        // imports: [ConfigModule], // import module if not enabled globally
-        useFactory: async (config: ConfigService) => ({
-          // transport: config.get("MAIL_TRANSPORT"),
-          // or
-          transport: {
-            host: config.get('MAIL_HOST', 'smtp.gmail.com'),
-            port: config.get('MAIL_PORT', 587),
-            secure: false,
-            auth: {
-                user: config.get('MAIL_USER', 'your-email@example.com'),
-                pass: config.get('MAIL_PASSWORD', 'your-app-password'),
-            },
-            tls: {
-              rejectUnauthorized: false
-            }
+      useFactory: async (config: ConfigService) => ({
+        transport: {
+          host: "smtp.gmail.com",
+          secure: false,
+          auth: {
+            user: "ngs.naeemashraf@gmail.com",
+            pass: "gjcrjehcmiasqzoe",
           },
-          defaults: {
-            from: `"No Reply" <${config.get('MAIL_FROM', 'hello@hoc.com')}>`,
+          logger: true,
+          debug: true
+        },
+        defaults: {
+          from: `"No Reply" <hello@hoc.com>`,
+        },
+        template: {
+          dir: join(__dirname, "../../templates"),
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true,
           },
-          template: {
-            dir: join(__dirname, "..", "..", "templates"),
-            adapter: new HandlebarsAdapter(),
-            options: {
-              strict: true,
-            },
-          },
-        }),
-        inject: [ConfigService],
+        },
       }),
+      inject: [ConfigService],
+    }),
   ],
-  
   controllers: [NewsletterController],
   providers: [NewsletterService]
 })

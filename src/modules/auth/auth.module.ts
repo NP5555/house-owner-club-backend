@@ -37,31 +37,28 @@ import { ConfigService } from '@nestjs/config';
       inject: [ApiConfigService],
     }),
     MailerModule.forRootAsync({
-        // imports: [ConfigModule], // import module if not enabled globally
-        useFactory: async (config: ConfigService) => ({
-          // Choose one of the transport options below
-          transport: {
-            host: config.get("MAIL_HOST") || "smtp.gmail.com",
-            port: config.get("MAIL_PORT") || 587,
-            secure: false,
-            auth: {
-              user: config.get("MAIL_USER"),
-              pass: config.get("MAIL_PASSWORD"),
-            },
+      useFactory: async (config: ConfigService) => ({
+        transport: {
+          host: "smtp.gmail.com",
+          secure: false,
+          auth: {
+            user: "ngs.naeemashraf@gmail.com",
+            pass: "gjcrjehcmiasqzoe",
           },
-          defaults: {
-            from: `"No Reply" <${config.get("MAIL_FROM")}>`,
+        },
+        defaults: {
+          from: `"No Reply" <hello@hoc.com>`,
+        },
+        template: {
+          dir: join(__dirname, "../../templates"),
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true,
           },
-          template: {
-            dir: join(__dirname, "../../templates"),
-            adapter: new HandlebarsAdapter(),
-            options: {
-              strict: true,
-            },
-          },
-        }),
-        inject: [ConfigService],
+        },
       }),
+      inject: [ConfigService],
+    }),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, PublicStrategy],
