@@ -104,18 +104,31 @@ AppModule = __decorate([
                 },
             }),
             nestjs_i18n_1.I18nModule.forRootAsync({
-                useFactory: (configService) => ({
-                    fallbackLanguage: configService.fallbackLanguage,
-                    loaderOptions: {
-                        path: path_1.default.join(__dirname, "/i18n/"),
-                        watch: configService.isDevelopment,
-                    },
-                    typesOutputPath: path_1.default.join(__dirname, '../src/generated/i18n.generated.ts'),
-                    resolvers: [
-                        new nestjs_i18n_1.QueryResolver(['lang']),
-                        new nestjs_i18n_1.AcceptLanguageResolver(),
-                    ],
-                }),
+                useFactory: (configService) => {
+                    const isCloudPlatform = process.env.RENDER || process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME;
+                    let i18nPath;
+                    if (configService.nodeEnv === 'production') {
+                        i18nPath = isCloudPlatform
+                            ? path_1.default.join(process.cwd(), 'dist/i18n')
+                            : path_1.default.join(process.cwd(), 'dist/i18n');
+                    }
+                    else {
+                        i18nPath = path_1.default.join(process.cwd(), 'src/i18n');
+                    }
+                    console.log(`I18n loading from path: ${i18nPath}`);
+                    return {
+                        fallbackLanguage: configService.fallbackLanguage,
+                        loaderOptions: {
+                            path: i18nPath,
+                            watch: configService.isDevelopment,
+                        },
+                        typesOutputPath: path_1.default.join(__dirname, '../src/generated/i18n.generated.ts'),
+                        resolvers: [
+                            new nestjs_i18n_1.QueryResolver(['lang']),
+                            new nestjs_i18n_1.AcceptLanguageResolver(),
+                        ],
+                    };
+                },
                 imports: [shared_module_1.SharedModule],
                 inject: [api_config_service_1.ApiConfigService],
             }),

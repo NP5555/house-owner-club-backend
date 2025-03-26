@@ -73,6 +73,20 @@ setup_env_vars() {
     return 0
 }
 
+# Function to setup i18n files for deployment
+setup_i18n_files() {
+  echo "📚 Setting up i18n files for deployment..."
+  
+  # Run the i18n copy script
+  node copy-i18n.js
+  
+  if [ $? -ne 0 ]; then
+    echo "⚠️  Warning: i18n copy script may have failed. Check logs for details."
+  else
+    echo "✅ i18n files setup completed!"
+  fi
+}
+
 # Deploy to Vercel
 deploy_to_vercel() {
     echo "🚀 Deploying to Vercel production..."
@@ -89,6 +103,9 @@ deploy_to_vercel() {
 
 # Main script execution
 echo "🔄 Starting deployment process..."
+
+# Setup i18n files
+setup_i18n_files
 
 # Ask if user wants to set environment variables
 read -p "Do you want to set environment variables? (y/n): " set_env

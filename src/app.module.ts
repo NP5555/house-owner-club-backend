@@ -112,18 +112,37 @@ import { SharedModule } from "./shared/shared.module";
 
 
     I18nModule.forRootAsync({
-      useFactory: (configService: ApiConfigService) => ({
-        fallbackLanguage: configService.fallbackLanguage,
-        loaderOptions: {
-          path: path.join(__dirname, "/i18n/"),
-          watch: configService.isDevelopment,
-        },
-        typesOutputPath: path.join(__dirname, '../src/generated/i18n.generated.ts'),
-        resolvers: [
-          new QueryResolver(['lang']),
-          new AcceptLanguageResolver(),
-        ],
-      }),
+      useFactory: (configService: ApiConfigService) => {
+        // For production environments, we need to check if we're in a cloud platform
+        const isCloudPlatform = process.env.RENDER || process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME;
+        
+        // Determine the i18n path based on environment
+        let i18nPath;
+        if (configService.nodeEnv === 'production') {
+          // In production, try to use the absolute path first
+          i18nPath = isCloudPlatform 
+            ? path.join(process.cwd(), 'dist/i18n') 
+            : path.join(process.cwd(), 'dist/i18n');
+        } else {
+          // In development, use the src path
+          i18nPath = path.join(process.cwd(), 'src/i18n');
+        }
+        
+        console.log(`I18n loading from path: ${i18nPath}`);
+        
+        return {
+          fallbackLanguage: configService.fallbackLanguage,
+          loaderOptions: {
+            path: i18nPath,
+            watch: configService.isDevelopment,
+          },
+          typesOutputPath: path.join(__dirname, '../src/generated/i18n.generated.ts'),
+          resolvers: [
+            new QueryResolver(['lang']),
+            new AcceptLanguageResolver(),
+          ],
+        };
+      },
       imports: [SharedModule],
       inject: [ApiConfigService],
     }),
