@@ -118,6 +118,7 @@ import { SharedModule } from "./shared/shared.module";
           path: path.join(__dirname, "/i18n/"),
           watch: configService.isDevelopment,
         },
+        typesOutputPath: path.join(__dirname, '../src/generated/i18n.generated.ts'),
         resolvers: [
           new QueryResolver(['lang']),
           new AcceptLanguageResolver(),
@@ -144,8 +145,10 @@ import { SharedModule } from "./shared/shared.module";
     RentModule,
     NewsletterModule,
     ServeStaticModule.forRoot({
-        rootPath: join(__dirname, '..', ''),    
-      }),
+        rootPath: join(__dirname, '..', 'public'),
+        exclude: ['/api*'],
+        serveRoot: '/',
+    }),
   ],
   providers: [],
 })

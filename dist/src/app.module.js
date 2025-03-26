@@ -110,6 +110,7 @@ AppModule = __decorate([
                         path: path_1.default.join(__dirname, "/i18n/"),
                         watch: configService.isDevelopment,
                     },
+                    typesOutputPath: path_1.default.join(__dirname, '../src/generated/i18n.generated.ts'),
                     resolvers: [
                         new nestjs_i18n_1.QueryResolver(['lang']),
                         new nestjs_i18n_1.AcceptLanguageResolver(),
@@ -136,7 +137,9 @@ AppModule = __decorate([
             rent_module_1.RentModule,
             newsletter_module_1.NewsletterModule,
             serve_static_1.ServeStaticModule.forRoot({
-                rootPath: (0, path_2.join)(__dirname, '..', ''),
+                rootPath: (0, path_2.join)(__dirname, '..', 'public'),
+                exclude: ['/api*'],
+                serveRoot: '/',
             }),
         ],
         providers: [],

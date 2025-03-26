@@ -126,7 +126,7 @@ let ApiConfigService = class ApiConfigService {
         if ((0, lodash_1.isNil)(value)) {
             throw new Error(key + ' environment variable does not set');
         }
-        return value;
+        return value || '';
     }
 };
 ApiConfigService = __decorate([

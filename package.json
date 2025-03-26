@@ -10,8 +10,7 @@
     "build": "tsc -p tsconfig.build.json",
     "postbuild": "copyfiles --up 1 src/**/*.json dist",
     "build:prod": "tsc -p tsconfig.build.json --skipLibCheck || true && copyfiles --up 1 src/**/*.json dist",
-    "render:prebuild": "echo 'Running render prebuild steps' && npm config set husky-skip-install 1",
-    "render:build": "npm run render:prebuild && npm run build:prod",
+    "vercel-build": "npm run build:prod",
     "start:hmr": "node dist/main.hmr.ts",
     "start:dev": "cross-env NODE_OPTIONS='--max-old-space-size=1024' ts-node src/main.ts",
     "start:prod": "cross-env NODE_OPTIONS='--max-old-space-size=1024' node dist/src/main.js",
@@ -38,7 +37,7 @@
     "docs:dev": "vuepress dev -p 7070",
     "docs:build": "DEPLOY_ENV=gh-pages vuepress build",
     "docs:deploy": "yarn docs:build && gh-pages -d .vuepress/dist",
-    "prepare": "if [ -z \"$CI\" ] && [ -z \"$RENDER\" ]; then husky install || true; fi",
+    "prepare": "if [ -z \"$CI\" ]; then husky install || true; fi",
     "prerelease": "yarn docs:deploy",
     "release": "release-it"
   },

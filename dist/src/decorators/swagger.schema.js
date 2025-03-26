@@ -25,6 +25,7 @@ function explore(instance, propertyKey) {
             return value.type;
         }
     }
+    return undefined;
 }
 function RegisterModels() {
     return (target, propertyKey, descriptor) => {
