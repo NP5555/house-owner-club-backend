@@ -32,7 +32,7 @@ export async function bootstrap(): Promise<NestExpressApplication> {
     { cors: true },
   );
   app.setGlobalPrefix('api');
-  app.enable('trust proxy'); // only if you're behind a reverse proxy (Vercel, Nginx, etc)
+  app.enable('trust proxy'); // only if you're behind a reverse proxy (Render, Nginx, etc)
   app.use(helmet());
   // app.setGlobalPrefix('/api'); use api as global prefix if you don't have subdomain
   app.use(
@@ -97,7 +97,7 @@ export async function bootstrap(): Promise<NestExpressApplication> {
   }
 
   const port = process.env.PORT || 3000;
-  await app.listen(port, '0.0.0.0');
+  await app.listen(port);
   console.log(`🚀 Application is running on: http://localhost:${port}`);
 
   return app;

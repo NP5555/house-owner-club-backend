@@ -114,7 +114,7 @@ import { SharedModule } from "./shared/shared.module";
     I18nModule.forRootAsync({
       useFactory: (configService: ApiConfigService) => {
         // For production environments, we need to check if we're in a cloud platform
-        const isCloudPlatform = process.env.RENDER || process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME;
+        const isCloudPlatform = process.env.RENDER;
         
         // Determine the i18n path based on environment
         let i18nPath;

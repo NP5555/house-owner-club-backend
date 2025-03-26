@@ -26,11 +26,8 @@
     - [`boilerplate.polyfill.ts`](#boilerplatepolyfillts)
     - [`snake-naming.strategy.ts`](#snake-namingstrategyts)
   - [`tests`](#tests)
-  - [`.dockerignore`](#dockerignore)
   - [`.env`](#env)
   - [`.eslintrc.js`](#eslintrcjs)
-  - [`docker-compose.yml`](#docker-composeyml)
-  - [`Dockerfile`](#dockerfile)
   - [`ormconfig.ts`](#ormconfigts)
 
 ## `.github/workflows`
@@ -139,10 +136,6 @@ We are using snake naming strategy for typeorm, so when you will generate migrat
 
 Folder where we keep all our e2e test files.
 
-## `.dockerignore`
-
-List a files which will be ignored during the docker build.
-
 ## `.env`
 
 Environment variables which will load before app start and will be stored in `process.env`, (*) is a env name (development, test, staging, production)
@@ -150,14 +143,6 @@ Environment variables which will load before app start and will be stored in `pr
 ## `.eslintrc.js`
 
 Eslint configuration file, See [the eslint doc](https://eslint.org/) for more.
-
-## `docker-compose.yml`
-
-Docker compose configuration file, See [the docker docs](https://docs.docker.com/compose/compose-file/) for more.
-
-## `Dockerfile`
-
-basic Dockerfile configuration to build the app, See [the docker docs](https://docs.docker.com/engine/reference/builder/) for more.
 
 ## `ormconfig.ts`
 

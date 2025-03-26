@@ -7,10 +7,7 @@
     - [Configuration](#configuration)
     - [Dev server](#dev-server)
   - [Generators](#generators)
-  - [Docker](#docker)
-    - [Docker installation](#docker-installation)
-    - [Docker-compose installation](#docker-compose-installation)
-    - [Run](#run)
+  - [Starting the Server](#starting-the-server)
 
 ## First-time setup
 
@@ -101,9 +98,6 @@ yarn typeorm migration:generate ./src/database/migrations/MySQLMigrations
 
 These steps may work for [other databases](https://typeorm.io/#features) supported by TypeORM. If they work, let us know and we'll add it to the docs!
 
-##### Docker Compose
-After completing the steps above, you can use [this docker-compose file](../docker-compose_mysql.yml) for awesome-nest-boilerplate with MySQL (instead of PostgreSQL).
-
 ### Dev server
 
 > Note: If you're on Linux and see an `ENOSPC` error when running the commands below, you must [increase the number of available file watchers](https://stackoverflow.com/questions/22475849/node-js-error-enospc#answer-32600959).
@@ -138,38 +132,22 @@ nest g class users
 ```
 > Note: if you love generators then you can find full list of command in official [Nest-cli Docs](https://docs.nestjs.com/cli/usages#generate-alias-g).
 
-## Docker
+## Starting the Server
 
-if you are familiar with [docker](https://www.docker.com/) and [docker-compose](https://docs.docker.com/compose) then you can run built in docker-compose file, which will install and configure application and database for you.
-
-### Docker installation
-
-Download docker from Official website
-
-- Mac <https://docs.docker.com/docker-for-mac/install/>
-- Windows <https://docs.docker.com/docker-for-windows/install/>
-- Ubuntu <https://docs.docker.com/install/linux/docker-ce/ubuntu/>
-
-### Docker-compose installation
-
-Download docker from [Official website](https://docs.docker.com/compose/install)
-
-### Run
-
-Open terminal and navigate to project directory and run the following command.
+Run Nest development server:
 
 ```bash
-PORT=3000 docker-compose up
+yarn start:dev
 ```
 
-> Note: application will run on port 3000 (<http://localhost:3000>)
+or if you need to debug
 
-Navigate to <http://localhost:8080> and connect to you database with the following configurations
-
-```text
-host: postgres
-user: postgres
-pass: postgres
+```bash
+yarn debug:dev
 ```
 
-create database `nest_boilerplate` and your application fully is ready to use.
+Run Nest production server:
+
+```bash
+yarn start:prod
+```

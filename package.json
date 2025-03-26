@@ -8,9 +8,8 @@
   "scripts": {
     "start": "cross-env NODE_OPTIONS='--max-old-space-size=2048' ts-node dist/src/main.ts",
     "build": "tsc -p tsconfig.build.json",
-    "postbuild": "copyfiles --up 1 src/**/*.json dist && copyfiles -u 0 public/**/* dist/public",
+    "postbuild": "copyfiles --up 1 src/**/*.json dist",
     "build:prod": "tsc -p tsconfig.build.json --skipLibCheck || true && copyfiles --up 1 src/**/*.json dist && node copy-i18n.js",
-    "vercel-build": "npm run build:prod",
     "start:hmr": "node dist/main.hmr.ts",
     "start:dev": "cross-env NODE_OPTIONS='--max-old-space-size=1024' ts-node src/main.ts",
     "start:prod": "cross-env NODE_OPTIONS='--max-old-space-size=1024' node dist/src/main.js",
