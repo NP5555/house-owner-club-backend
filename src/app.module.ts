@@ -164,14 +164,8 @@ import { SharedModule } from "./shared/shared.module";
     RentModule,
     NewsletterModule,
     ServeStaticModule.forRoot({
-        rootPath: join(__dirname, '..', 'public'),
-        exclude: ['/api*'],
-        serveRoot: '/active',
-    }),
-    ServeStaticModule.forRoot({
-        rootPath: join(__dirname, '..', 'public'),
-        exclude: ['/api*'],
-        serveRoot: '/',
+      rootPath: join(__dirname, '..', 'public'),
+      exclude: ['/api*'],
     }),
   ],
   providers: [],

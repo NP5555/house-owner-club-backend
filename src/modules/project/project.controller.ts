@@ -10,6 +10,7 @@ import {
   Query,
   Res,
   ValidationPipe,
+  HttpException,
 } from "@nestjs/common";
 import { ProjectService } from "./project.service";
 import { Auth, UUIDParam } from "../../decorators";
@@ -80,16 +81,39 @@ export class ProjectController {
     @Query("developerId") developerId: string,
     @Res() res: any
   ): Promise<PageDto<ProjectDto>> {
-    const tradeLands = await this.service.findAllByDeveloperId(
-      developerId,
-      pageOptionsDto
-    );
-    res.status(HttpStatus.OK).json({
-      status: HttpStatus.OK,
-      message: "Records Found",
-      data: tradeLands,
-    });
-    return tradeLands;
+    if (!developerId || developerId === 'undefined') {
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        status: HttpStatus.BAD_REQUEST,
+        message: "Developer ID is required",
+        error: "Missing developerId parameter"
+      });
+    }
+
+    try {
+      const tradeLands = await this.service.findAllByDeveloperId(
+        developerId,
+        pageOptionsDto
+      );
+      res.status(HttpStatus.OK).json({
+        status: HttpStatus.OK,
+        message: "Records Found",
+        data: tradeLands,
+      });
+      return tradeLands;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        return res.status(error.getStatus()).json({
+          status: error.getStatus(),
+          message: error.message,
+          error: error.name
+        });
+      }
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: "Internal server error",
+        error: error.message
+      });
+    }
   }
 
   @Get(":id")

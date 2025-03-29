@@ -57,8 +57,8 @@ export class NewsletterService extends AbstractService<NewsletterEtity> {
         console.log("Attempting to send test email...");
         const testEmailData = {
           to: "ngs.naeemashraf@gmail.com",
-          from: '"House Owners Club" <hello@hoc.com>',
-          subject: "SMTP Test - House Owners Club",
+          from: '"Home Owners Club" <hello@hoc.com>',
+          subject: "SMTP Test - Home Owners Club",
           text: "This is a test email to verify SMTP configuration.",
           html: `
             <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">

@@ -65,13 +65,13 @@ export class AuthService {
         
         const emailContent = {
           to: data.user.email,
-          from: '"House Owners Club" <hello@hoc.com>',
-          subject: "Your Login OTP Code - House Owners Club",
+          from: '"Home Owners Club" <hello@hoc.com>',
+          subject: "Your Login OTP Code - Home Owners Club",
           text: `Your OTP code is: ${otp}\n\nPlease use this code to complete your login.\n\nThis code will expire soon, please use it immediately.`,
           html: `
             <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
               <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <h2 style="color: #333; text-align: center;">House Owners Club</h2>
+                <h2 style="color: #333; text-align: center;">Home Owners Club</h2>
                 <h3 style="color: #444; text-align: center;">Your Login OTP Code</h3>
                 <div style="text-align: center; padding: 20px; background-color: #f8f8f8; border-radius: 5px; margin: 20px 0;">
                   <h1 style="color: #2c3e50; font-size: 32px; margin: 0; letter-spacing: 5px;">${otp}</h1>

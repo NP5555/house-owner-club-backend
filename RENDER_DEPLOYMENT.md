@@ -1,8 +1,8 @@
-# House Owner Club Backend Deployment on Render
+# Home Owner Club Backend Deployment on Render
 
 ## Overview
 
-This document describes how to deploy the House Owner Club Backend application on Render, a modern cloud platform for hosting web services, databases, and more.
+This document describes how to deploy the Home Owner Club Backend application on Render, a modern cloud platform for hosting web services, databases, and more.
 
 ## Deployment Steps
 
@@ -17,7 +17,7 @@ If you haven't already, sign up for a Render account at [render.com](https://ren
 3. Configure your service with the following settings:
 
 #### Basic Configuration
-- **Name**: house-owner-club-backend (or your preferred name)
+- **Name**: Home-owner-club-backend (or your preferred name)
 - **Environment**: Node
 - **Region**: Choose the region closest to your users
 
@@ -83,4 +83,4 @@ If you encounter issues with your deployment:
 
 ## Conclusion
 
-Your House Owner Club Backend is now deployed on Render! The application should be accessible at the URL provided by Render (typically `https://your-service-name.onrender.com`). 
+Your Home Owner Club Backend is now deployed on Render! The application should be accessible at the URL provided by Render (typically `https://your-service-name.onrender.com`). 

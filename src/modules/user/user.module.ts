@@ -8,7 +8,7 @@ import { UserEntity } from "./user.entity";
 import { UserService } from "./user.service";
 import { UserSettingsEntity } from "./user-settings.entity";
 import { UserKYCEntity } from "../user-kyc/entities/user-kyc.entity";
-// import { AgentLandEntity } from '../agent-land/entities/agent-land.entity';
+import { AgentLandEntity } from '../agent-land/entities/agent-land.entity';
 import { MailerModule } from "@nestjs-modules/mailer";
 import { HandlebarsAdapter } from "@nestjs-modules/mailer/dist/adapters/handlebars.adapter";
 import { join } from "path";
