@@ -10,6 +10,7 @@ import {
   Query,
   Res,
   ValidationPipe,
+  HttpException,
 } from "@nestjs/common";
 import { TypeService } from "./type.service";
 import {  UUIDParam } from "../../decorators";
@@ -56,14 +57,43 @@ export class TypeController {
   async findAll(
     @Query(new ValidationPipe({ transform: true }))
     pageOptionsDto: PageOptionsDto,
+    @Query('developerId') developerId: string,
     @Res() res: any
   ): Promise<PageDto<TypeDto>> {
-    res.status(HttpStatus.OK).json({
-      status: HttpStatus.OK,
-      message: "Record Found",
-      data: await this.service.findAllPageOptions(pageOptionsDto),
-    });
-    return this.service.findAllPageOptions(pageOptionsDto);
+    try {
+      if (!developerId) {
+        return res.status(HttpStatus.BAD_REQUEST).json({
+          status: HttpStatus.BAD_REQUEST,
+          message: "Developer ID is required",
+        });
+      }
+      
+      // Add developerId to the pageOptionsDto
+      const queryOptions = {
+        ...pageOptionsDto,
+        developerId
+      };
+      
+      const typesData = await this.service.findAllPageOptions(queryOptions);
+      
+      return res.status(HttpStatus.OK).json({
+        status: HttpStatus.OK,
+        message: "Record Found",
+        data: typesData,
+      });
+    } catch (error) {
+      if (error instanceof HttpException) {
+        return res.status(error.getStatus()).json({
+          status: error.getStatus(),
+          message: error.message,
+        });
+      }
+      
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: "Failed to retrieve types",
+      });
+    }
   }
 
   @Get(":id")
