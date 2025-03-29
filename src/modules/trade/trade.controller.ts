@@ -136,58 +136,17 @@ export class TradeController {
     @Query("tokenId") tokenId: number,
     @Query("nftAddress") nftAddress: string,
     @Res() res: any
-  ): Promise<any> {
-    try {
-      // Validate input parameters
-      if (!tokenId && tokenId !== 0) {
-        return res.status(HttpStatus.BAD_REQUEST).json({
-          status: HttpStatus.BAD_REQUEST,
-          message: "Property ID (tokenId) is required",
-        });
-      }
-
-      if (!nftAddress) {
-        return res.status(HttpStatus.BAD_REQUEST).json({
-          status: HttpStatus.BAD_REQUEST,
-          message: "NFT Address is required",
-        });
-      }
-
-      // Attempt to find the property data
-      try {
-        const tradeLands = await this.service.findLandByUser(
-          tokenId,
-          nftAddress,
-        );
-
-        return res.status(HttpStatus.OK).json({
-          status: HttpStatus.OK,
-          message: "Records Found",
-          data: tradeLands,
-        });
-      } catch (error) {
-        // Handle the case where no record was found
-        if (error.status === HttpStatus.NOT_FOUND) {
-          return res.status(HttpStatus.NOT_FOUND).json({
-            status: HttpStatus.NOT_FOUND,
-            message: "No property found with the provided ID and address",
-          });
-        }
-        
-        // Handle other errors
-        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: "Failed to retrieve property data",
-          error: error.message
-        });
-      }
-    } catch (e) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: "An unexpected error occurred",
-        error: e.message
-      });
-    }
+  ): Promise<TradeDto> {
+    const tradeLands = await this.service.findLandByUser(
+      tokenId,
+      nftAddress,
+    );
+    res.status(HttpStatus.OK).json({
+      status: HttpStatus.OK,
+      message: "Records Found",
+      data: tradeLands,
+    });
+    return tradeLands;
   }
 
   @Get(":id")

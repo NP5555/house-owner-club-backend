@@ -162,83 +162,40 @@ export class TradeService extends AbstractService<TradeEntity> {
   }
 
   async findLandByUser(tokenId: number, nftAddress: string): Promise<any> {
-    // Validate input parameters
-    if (tokenId === undefined || tokenId === null) {
-      throw new HttpException(
-        "Property ID (tokenId) is required", 
-        HttpStatus.BAD_REQUEST
+    const queryBuilder = await this.tradeEntityRepository
+      .createQueryBuilder("trade")
+      .leftJoinAndSelect("trade.project", "project")
+      .leftJoinAndSelect("trade.type", "type")
+      .leftJoinAndSelect("project.category", "category")
+      .leftJoinAndSelect("project.currency", "currency")
+      .leftJoinAndSelect("trade.agentLand", "agentLand")
+      .leftJoinAndSelect("trade.user", "user")
+      .where("project.nftAddress = :nftAddress", { nftAddress })
+      .andWhere("trade.tokenId = :tokenId", { tokenId })
+      .getOne();
+
+    if (!queryBuilder) {
+      throw new HttpException("Failed to load data", HttpStatus.NOT_FOUND);
+    } else {
+      const {
+        password,
+        referralCode,
+        referredBy,
+        avatar,
+        isKYC,
+        isActive,
+        id,
+        createdAt,
+        updatedAt,
+        role,
+        ...userData
+      } = queryBuilder.user;
+
+      let transactionData = await this.transactionService.getTransactionHash(
+        queryBuilder.projectId,
+        Number(queryBuilder.agentLand.tokenId)
       );
-    }
-
-    if (!nftAddress) {
-      throw new HttpException(
-        "NFT Address is required", 
-        HttpStatus.BAD_REQUEST
-      );
-    }
-
-    // Query the database
-    try {
-      const queryBuilder = await this.tradeEntityRepository
-        .createQueryBuilder("trade")
-        .leftJoinAndSelect("trade.project", "project")
-        .leftJoinAndSelect("trade.type", "type")
-        .leftJoinAndSelect("project.category", "category")
-        .leftJoinAndSelect("project.currency", "currency")
-        .leftJoinAndSelect("trade.agentLand", "agentLand")
-        .leftJoinAndSelect("trade.user", "user")
-        .where("project.nftAddress = :nftAddress", { nftAddress })
-        .andWhere("trade.tokenId = :tokenId", { tokenId })
-        .getOne();
-
-      if (!queryBuilder) {
-        throw new HttpException(
-          `No property record found with ID ${tokenId} and NFT address ${nftAddress}`, 
-          HttpStatus.NOT_FOUND
-        );
-      } else {
-        // Extract and format user data
-        const {
-          password,
-          referralCode,
-          referredBy,
-          avatar,
-          isKYC,
-          isActive,
-          id,
-          createdAt,
-          updatedAt,
-          role,
-          ...userData
-        } = queryBuilder.user;
-
-        // Get transaction history
-        let transactionData = [];
-        try {
-          transactionData = await this.transactionService.getTransactionHash(
-            queryBuilder.projectId,
-            Number(queryBuilder.agentLand.tokenId)
-          );
-        } catch (error) {
-          // Log transaction error but continue
-          console.error("Failed to fetch transaction history:", error.message);
-          transactionData = [];
-        }
-
-        return { user: userData, transactions: transactionData };
-      }
-    } catch (error) {
-      // Re-throw HttpExceptions as-is
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      
-      // Log and wrap other errors
-      console.error("Error in findLandByUser:", error);
-      throw new HttpException(
-        "Failed to retrieve property information", 
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      return { user: userData, transactions: transactionData };
     }
   }
 
