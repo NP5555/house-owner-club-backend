@@ -1,4 +1,4 @@
-import { BooleanField, StringField } from "../../../decorators";
+import { BooleanField, StringField, StringFieldOptional } from "../../../decorators";
 
 export class CreateUserKYCDto {
   @StringField()
@@ -13,7 +13,7 @@ export class CreateUserKYCDto {
   @StringField()
   address: string;
 
-  @StringField()
+  @StringField({ required: false })
   street: string;
 
   @StringField()
@@ -25,13 +25,13 @@ export class CreateUserKYCDto {
   @StringField()
   mobileNumber: string;
 
-  @StringField()
+  @StringFieldOptional()
   company: string;
 
   @StringField()
   pubkey: string;
 
-  @StringField()
+  @StringField({ required: false })
   certificates: string;
 
   @StringField()

@@ -19,7 +19,7 @@ export class UserKYCEntity extends AbstractEntity<UserKYCDto> {
   @Column({ nullable: false })
   address: string;
 
-  @Column({ nullable: false })
+  @Column({ nullable: true })
   street: string;
 
   @Column({ nullable: false })
@@ -31,13 +31,13 @@ export class UserKYCEntity extends AbstractEntity<UserKYCDto> {
   @Column({ nullable: false })
   mobileNumber: string;
 
-  @Column({ nullable: false })
+  @Column({ nullable: true })
   company: string;
 
   @Column({ nullable: true })
   pubkey: string;
 
-  @Column({ nullable: false })
+  @Column({ nullable: true })
   certificates: string;
 
   @Column({ nullable: true })
