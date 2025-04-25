@@ -31,7 +31,7 @@ export async function bootstrap(): Promise<NestExpressApplication> {
     new ExpressAdapter(),
     { 
       cors: {
-        origin: ['https://myhoc.netlify.app', 'http://localhost:3000'],
+        origin: ['https://myhoc.netlify.app', 'http://localhost:3000', 'https://hoc-fe-eta.vercel.app'],
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
         credentials: true,
       }
