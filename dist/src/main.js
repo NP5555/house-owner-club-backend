@@ -24,7 +24,13 @@ const translation_service_1 = require("./shared/services/translation.service");
 const shared_module_1 = require("./shared/shared.module");
 async function bootstrap() {
     (0, typeorm_transactional_1.initializeTransactionalContext)();
-    const app = await core_1.NestFactory.create(app_module_1.AppModule, new platform_express_1.ExpressAdapter(), { cors: true });
+    const app = await core_1.NestFactory.create(app_module_1.AppModule, new platform_express_1.ExpressAdapter(), {
+        cors: {
+            origin: ['https://myhoc.netlify.app', 'http://localhost:3000', 'https://hoc-fe-eta.vercel.app', 'https://app.myhoc.io'],
+            methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+            credentials: true,
+        }
+    });
     app.setGlobalPrefix('api');
     app.enable('trust proxy');
     app.use((0, helmet_1.default)());
@@ -64,7 +70,7 @@ async function bootstrap() {
     if (!configService.isDevelopment) {
         app.enableShutdownHooks();
     }
-    const port = process.env.PORT || 3000;
+    const port = process.env.PORT || 3001;
     await app.listen(port);
     console.log(`🚀 Application is running on: http://localhost:${port}`);
     return app;

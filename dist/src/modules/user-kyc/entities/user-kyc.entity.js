@@ -34,7 +34,7 @@ __decorate([
     __metadata("design:type", String)
 ], UserKYCEntity.prototype, "address", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: false }),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], UserKYCEntity.prototype, "street", void 0);
 __decorate([
@@ -50,7 +50,7 @@ __decorate([
     __metadata("design:type", String)
 ], UserKYCEntity.prototype, "mobileNumber", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: false }),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], UserKYCEntity.prototype, "company", void 0);
 __decorate([
@@ -58,7 +58,7 @@ __decorate([
     __metadata("design:type", String)
 ], UserKYCEntity.prototype, "pubkey", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: false }),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], UserKYCEntity.prototype, "certificates", void 0);
 __decorate([

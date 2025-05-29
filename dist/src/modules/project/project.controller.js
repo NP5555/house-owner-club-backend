@@ -23,6 +23,7 @@ const UpdateResult_1 = require("typeorm/query-builder/result/UpdateResult");
 const DeleteResult_1 = require("typeorm/query-builder/result/DeleteResult");
 const create_project_dto_1 = require("./dto/create-project.dto");
 const update_project_dto_1 = require("./dto/update-project.dto");
+const constants_1 = require("../../constants");
 let ProjectController = class ProjectController {
     constructor(service) {
         this.service = service;
@@ -32,6 +33,15 @@ let ProjectController = class ProjectController {
         const allProjects = await this.service.findAll();
         return { projectCreated, allProjects };
     }
+    async adminCreate(CreateProjectDto) {
+        const projectCreated = await this.service.save(CreateProjectDto);
+        const allProjects = await this.service.findAllPublicProjects();
+        return {
+            projectCreated,
+            allProjects,
+            message: "Project created successfully for public viewing"
+        };
+    }
     async findAll(pageOptionsDto, res) {
         res.status(common_1.HttpStatus.OK).json({
             status: common_1.HttpStatus.OK,
@@ -40,14 +50,53 @@ let ProjectController = class ProjectController {
         });
         return this.service.findAllPageOptions(pageOptionsDto);
     }
-    async findByUserId(pageOptionsDto, developerId, res) {
-        const tradeLands = await this.service.findAllByDeveloperId(developerId, pageOptionsDto);
+    async adminFindAll(pageOptionsDto, res) {
         res.status(common_1.HttpStatus.OK).json({
             status: common_1.HttpStatus.OK,
-            message: "Records Found",
-            data: tradeLands,
+            message: "Record Found",
+            data: await this.service.findAllPageOptions(pageOptionsDto),
         });
-        return tradeLands;
+        return this.service.findAllPageOptions(pageOptionsDto);
+    }
+    async findPublicProjects(pageOptionsDto, res) {
+        res.status(common_1.HttpStatus.OK).json({
+            status: common_1.HttpStatus.OK,
+            message: "Public projects found",
+            data: await this.service.findAllPublicProjects(pageOptionsDto),
+        });
+        return this.service.findAllPublicProjects(pageOptionsDto);
+    }
+    async findByUserId(pageOptionsDto, developerId, res) {
+        if (!developerId || developerId === 'undefined') {
+            return res.status(common_1.HttpStatus.BAD_REQUEST).json({
+                status: common_1.HttpStatus.BAD_REQUEST,
+                message: "Developer ID is required",
+                error: "Missing developerId parameter"
+            });
+        }
+        try {
+            const tradeLands = await this.service.findAllByDeveloperId(developerId, pageOptionsDto);
+            res.status(common_1.HttpStatus.OK).json({
+                status: common_1.HttpStatus.OK,
+                message: "Records Found",
+                data: tradeLands,
+            });
+            return tradeLands;
+        }
+        catch (error) {
+            if (error instanceof common_1.HttpException) {
+                return res.status(error.getStatus()).json({
+                    status: error.getStatus(),
+                    message: error.message,
+                    error: error.name
+                });
+            }
+            return res.status(common_1.HttpStatus.INTERNAL_SERVER_ERROR).json({
+                status: common_1.HttpStatus.INTERNAL_SERVER_ERROR,
+                message: "Internal server error",
+                error: error.message
+            });
+        }
     }
     async findOne(id) {
         const project = await this.service.findOne({ id });
@@ -75,6 +124,7 @@ let ProjectController = class ProjectController {
 };
 __decorate([
     (0, common_1.Post)(),
+    (0, decorators_1.Auth)([constants_1.RoleType.DEVELOPER]),
     (0, swagger_1.ApiResponse)({
         status: common_1.HttpStatus.CREATED,
         description: "Registration of project",
@@ -85,6 +135,19 @@ __decorate([
     __metadata("design:paramtypes", [create_project_dto_1.CreateProjectDto]),
     __metadata("design:returntype", Promise)
 ], ProjectController.prototype, "create", null);
+__decorate([
+    (0, common_1.Post)("admin"),
+    (0, decorators_1.Auth)([constants_1.RoleType.ADMIN]),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.CREATED,
+        description: "Admin creation of project for public viewing",
+        type: create_project_dto_1.CreateProjectDto,
+    }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [create_project_dto_1.CreateProjectDto]),
+    __metadata("design:returntype", Promise)
+], ProjectController.prototype, "adminCreate", null);
 __decorate([
     (0, common_1.Get)(),
     (0, swagger_1.ApiResponse)({
@@ -100,7 +163,37 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ProjectController.prototype, "findAll", null);
 __decorate([
+    (0, common_1.Get)("admin/all"),
+    (0, decorators_1.Auth)([constants_1.RoleType.ADMIN]),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.OK,
+        description: "Get all projects for admin management",
+        type: create_project_dto_1.CreateProjectDto,
+        isArray: true,
+    }),
+    __param(0, (0, common_1.Query)(new common_1.ValidationPipe({ transform: true }))),
+    __param(1, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [page_options_dto_1.PageOptionsDto, Object]),
+    __metadata("design:returntype", Promise)
+], ProjectController.prototype, "adminFindAll", null);
+__decorate([
+    (0, common_1.Get)("public"),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.OK,
+        description: "Get public projects visible to all users",
+        type: create_project_dto_1.CreateProjectDto,
+        isArray: true,
+    }),
+    __param(0, (0, common_1.Query)(new common_1.ValidationPipe({ transform: true }))),
+    __param(1, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [page_options_dto_1.PageOptionsDto, Object]),
+    __metadata("design:returntype", Promise)
+], ProjectController.prototype, "findPublicProjects", null);
+__decorate([
     (0, common_1.Get)("/developerId"),
+    (0, decorators_1.Auth)([constants_1.RoleType.DEVELOPER, constants_1.RoleType.ADMIN]),
     (0, swagger_1.ApiResponse)({
         status: common_1.HttpStatus.OK,
         description: "Get projects",
@@ -128,6 +221,7 @@ __decorate([
 ], ProjectController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(":id"),
+    (0, decorators_1.Auth)([constants_1.RoleType.ADMIN, constants_1.RoleType.DEVELOPER]),
     (0, swagger_1.ApiResponse)({
         status: common_1.HttpStatus.OK,
         description: "Update project by Id",
@@ -141,9 +235,10 @@ __decorate([
 ], ProjectController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(":id"),
+    (0, decorators_1.Auth)([constants_1.RoleType.ADMIN, constants_1.RoleType.DEVELOPER]),
     (0, swagger_1.ApiResponse)({
         status: common_1.HttpStatus.OK,
-        description: "Delete event",
+        description: "Delete project",
         type: DeleteResult_1.DeleteResult,
     }),
     __param(0, (0, decorators_1.UUIDParam)("id")),

@@ -24,6 +24,7 @@ import { UpdateResult } from "typeorm/query-builder/result/UpdateResult";
 import { DeleteResult } from "typeorm/query-builder/result/DeleteResult";
 import { CreateProjectDto } from "./dto/create-project.dto";
 import { UpdateProjectDto } from "./dto/update-project.dto";
+import { RoleType } from "../../constants";
 
 @Controller("project")
 @ApiTags("project")
@@ -31,8 +32,7 @@ export class ProjectController {
   constructor(readonly service: ProjectService) {}
 
   @Post()
-  // @Auth(AbilitiesGuard)
-  // @CheckPolicies(ProjectManagePolicyHandler)
+  @Auth([RoleType.DEVELOPER])
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: "Registration of project",
@@ -44,9 +44,31 @@ export class ProjectController {
     return { projectCreated, allProjects };
   }
 
+  // Admin endpoint to create projects for public viewing
+  @Post("admin")
+  @Auth([RoleType.ADMIN])
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: "Admin creation of project for public viewing",
+    type: CreateProjectDto,
+  })
+  async adminCreate(@Body() CreateProjectDto: CreateProjectDto) {
+    // For admin projects, we'll set a special flag or use a specific developerId
+    // to indicate these are admin-created public projects
+    const projectCreated = await this.service.save(CreateProjectDto);
+    
+    // Create default page options for getting all projects
+    const defaultPageOptions = new PageOptionsDto();
+    
+    const allProjects = await this.service.findAllPublicProjects(defaultPageOptions);
+    return { 
+      projectCreated, 
+      allProjects,
+      message: "Project created successfully for public viewing"
+    };
+  }
+
   @Get()
-  // @Auth(AbilitiesGuard)
-  // @CheckPolicies(ProjectManagePolicyHandler)
   @ApiResponse({
     status: HttpStatus.OK,
     description: "Get projects",
@@ -66,9 +88,52 @@ export class ProjectController {
     return this.service.findAllPageOptions(pageOptionsDto);
   }
 
+  // Admin endpoint to get all projects for management
+  @Get("admin/all")
+  @Auth([RoleType.ADMIN])
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: "Get all projects for admin management",
+    type: CreateProjectDto,
+    isArray: true,
+  })
+  async adminFindAll(
+    @Query(new ValidationPipe({ transform: true }))
+    pageOptionsDto: PageOptionsDto,
+    @Res() res: any
+  ): Promise<PageDto<ProjectDto>> {
+    res.status(HttpStatus.OK).json({
+      status: HttpStatus.OK,
+      message: "Record Found",
+      data: await this.service.findAllPageOptions(pageOptionsDto),
+    });
+    return this.service.findAllPageOptions(pageOptionsDto);
+  }
+
+  // Public endpoint for users to view all projects (including admin-created)
+  @Get("public")
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: "Get public projects visible to all users",
+    type: CreateProjectDto,
+    isArray: true,
+  })
+  async findPublicProjects(
+    @Query(new ValidationPipe({ transform: true }))
+    pageOptionsDto: PageOptionsDto,
+    @Res() res: any
+  ) {
+    const result = await this.service.findAllPublicProjects(pageOptionsDto);
+    res.status(HttpStatus.OK).json({
+      status: HttpStatus.OK,
+      message: "Public projects found",
+      data: result,
+    });
+    return result;
+  }
+
   @Get("/developerId")
-  // @Auth(AbilitiesGuard)
-  // @CheckPolicies(BuyManagePolicyHandler)
+  @Auth([RoleType.DEVELOPER, RoleType.ADMIN])
   @ApiResponse({
     status: HttpStatus.OK,
     description: "Get projects",
@@ -117,8 +182,6 @@ export class ProjectController {
   }
 
   @Get(":id")
-  // @Auth(AbilitiesGuard)
-  // @CheckPolicies(ProjectManagePolicyHandler)
   @ApiResponse({
     status: HttpStatus.OK,
     description: "Get project by Id",
@@ -133,8 +196,7 @@ export class ProjectController {
   }
 
   @Patch(":id")
-  // @Auth(AbilitiesGuard)
-  // @CheckPolicies(ProjectManagePolicyHandler)
+  @Auth([RoleType.ADMIN, RoleType.DEVELOPER])
   @ApiResponse({
     status: HttpStatus.OK,
     description: "Update project by Id",
@@ -152,11 +214,10 @@ export class ProjectController {
   }
 
   @Delete(":id")
-  // @Auth(AbilitiesGuard)
-  // @CheckPolicies(ProjectManagePolicyHandler)
+  @Auth([RoleType.ADMIN, RoleType.DEVELOPER])
   @ApiResponse({
     status: HttpStatus.OK,
-    description: "Delete event",
+    description: "Delete project",
     type: DeleteResult,
   })
   async remove(@UUIDParam("id") id: Uuid) {

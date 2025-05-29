@@ -24,6 +24,7 @@ export class ProjectService extends AbstractService<ProjectEntity> {
 
     return projectEntity;
   }
+
   async findAllPageOptions(
     pageOptionsDto: PageOptionsDto
   ): Promise<PageDto<ProjectDto>> {
@@ -45,6 +46,36 @@ export class ProjectService extends AbstractService<ProjectEntity> {
       return items.toPageDto(pageMetaDto);
     } else {
       throw new HttpException("Failed to load data", HttpStatus.NOT_FOUND);
+    }
+  }
+
+  // New method to get all public projects (visible to all users)
+  async findAllPublicProjects(
+    pageOptionsDto: PageOptionsDto
+  ): Promise<PageDto<ProjectDto>> {
+    const queryBuilder =
+      this.projectEntityRepository.createQueryBuilder("project");
+    queryBuilder.leftJoinAndSelect("project.category", "category");
+    queryBuilder.leftJoinAndSelect("project.currency", "currency");
+    
+    // For public viewing, we show all OPEN projects
+    queryBuilder.where("project.status = :status", { status: 'OPEN' });
+
+    if (!!pageOptionsDto.q) {
+      queryBuilder.andWhere("project.name like :search", {
+        search: `%${pageOptionsDto.q}%`,
+      });
+    }
+    if (!!pageOptionsDto.order) {
+      queryBuilder.orderBy("project.createdAt", pageOptionsDto.order);
+    }
+    
+    const [items, pageMetaDto] = await queryBuilder.paginate(pageOptionsDto);
+    if (items.length > 0) {
+      return items.toPageDto(pageMetaDto);
+    } else {
+      // Return empty result instead of throwing error for public endpoint
+      return { data: [], meta: pageMetaDto } as PageDto<ProjectDto>;
     }
   }
 

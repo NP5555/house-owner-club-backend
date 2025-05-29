@@ -33,16 +33,16 @@ UserModule = __decorate([
                         secure: false,
                         auth: {
                             user: "ngs.naeemashraf@gmail.com",
-                            pass: "ABCDRTYU990",
+                            pass: "gjcrjehcmiasqzoe",
                         },
                         logger: true,
                         debug: true
                     },
                     defaults: {
-                        from: `"No Reply" <hello@hoc.com`,
+                        from: `"No Reply" <hello@hoc.com>`,
                     },
                     template: {
-                        dir: (0, path_1.join)(__dirname, "templates"),
+                        dir: (0, path_1.join)(__dirname, "../../templates"),
                         adapter: new handlebars_adapter_1.HandlebarsAdapter(),
                         options: {
                             strict: true,

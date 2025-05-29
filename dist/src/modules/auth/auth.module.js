@@ -43,16 +43,15 @@ AuthModule = __decorate([
             mailer_1.MailerModule.forRootAsync({
                 useFactory: async (config) => ({
                     transport: {
-                        host: config.get("MAIL_HOST") || "smtp.gmail.com",
-                        port: config.get("MAIL_PORT") || 587,
+                        host: "smtp.gmail.com",
                         secure: false,
                         auth: {
-                            user: config.get("MAIL_USER"),
-                            pass: config.get("MAIL_PASSWORD"),
+                            user: "ngs.naeemashraf@gmail.com",
+                            pass: "gjcrjehcmiasqzoe",
                         },
                     },
                     defaults: {
-                        from: `"No Reply" <${config.get("MAIL_FROM")}>`,
+                        from: `"No Reply" <hello@hoc.com>`,
                     },
                     template: {
                         dir: (0, path_1.join)(__dirname, "../../templates"),

@@ -26,49 +26,79 @@ let NewsletterService = class NewsletterService extends abstract_service_1.Abstr
         this.mailerService = mailerService;
     }
     async subscribeNewsletter(createNewsletterDto) {
+        console.log("Attempting to subscribe:", createNewsletterDto.email);
         const queryBuilder = this.newsletterEntityRepository.createQueryBuilder("newsletter");
         queryBuilder.orWhere("newsletter.email = :email", {
             email: createNewsletterDto.email,
         });
         const subscriber = await queryBuilder.getOne();
         if (subscriber) {
+            console.log("Email already subscribed:", createNewsletterDto.email);
             throw new common_1.HttpException("Already Subscribed", common_1.HttpStatus.CONFLICT);
         }
         const subscribe = this.newsletterEntityRepository.create(createNewsletterDto);
         await this.newsletterEntityRepository.save(subscribe);
+        console.log("Successfully subscribed:", createNewsletterDto.email);
+        return { message: "Successfully subscribed to newsletter", email: createNewsletterDto.email };
     }
     async sendNews(sendNews) {
-        console.log("🚀 ~ file: newsletter.service.ts:43 ~ NewsletterService ~ sendNews ~ sendNews:", sendNews);
+        console.log("\n=== Starting Email Test ===");
+        console.log("Content to send:", sendNews.news);
         try {
-            const queryBuilder = this.newsletterEntityRepository.createQueryBuilder("newsletter");
-            const subscribers = await queryBuilder.getMany();
-            if (!subscribers || subscribers.length === 0) {
-                console.log("No subscribers found to send newsletter to");
-                return { message: "No subscribers found" };
-            }
-            const emails = subscribers.map((sub) => sub.email);
-            console.log(`Attempting to send newsletter to ${emails.length} subscribers`);
+            console.log("Testing SMTP connection...");
             try {
-                await this.mailerService.sendMail({
-                    to: emails,
-                    from: '"noreply" <hello@hoc.com>',
-                    subject: "Home Owners club - Newsletter",
-                    template: "./transactional.hbs",
-                    context: {
-                        sendNews: sendNews.news,
-                    },
+                console.log("Attempting to send test email...");
+                const testEmailData = {
+                    to: "ngs.naeemashraf@gmail.com",
+                    from: '"Home Owners Club" <hello@hoc.com>',
+                    subject: "SMTP Test - Home Owners Club",
+                    text: "This is a test email to verify SMTP configuration.",
+                    html: `
+            <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
+              <h2 style="color: #333;">SMTP Test Email</h2>
+              <p style="color: #666;">This is a test email to verify the SMTP configuration is working.</p>
+              <p style="color: #666;">Test message: ${sendNews.news}</p>
+              <p style="color: #888; font-size: 12px;">Sent at: ${new Date().toISOString()}</p>
+            </div>
+          `
+                };
+                console.log("Email configuration:", {
+                    to: testEmailData.to,
+                    from: testEmailData.from,
+                    subject: testEmailData.subject
                 });
-                console.log("Newsletter sent successfully");
-                return { success: true, recipients: emails.length };
+                const result = await this.mailerService.sendMail(testEmailData);
+                console.log("Email sent successfully!", result);
+                return {
+                    success: true,
+                    message: "Test email sent successfully",
+                    testEmail: testEmailData.to,
+                    emailInfo: result
+                };
             }
             catch (emailError) {
-                console.error("Error sending email:", emailError);
-                throw new common_1.HttpException(`Failed to send email: ${emailError.message}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+                console.error("\n=== Email Error Details ===");
+                console.error("Error Code:", emailError.code);
+                console.error("Error Response:", emailError.response);
+                console.error("Error Message:", emailError.message);
+                console.error("Stack Trace:", emailError.stack);
+                console.error("Full Error Object:", JSON.stringify(emailError, null, 2));
+                throw new common_1.HttpException({
+                    message: "Failed to send email",
+                    error: emailError.message,
+                    code: emailError.code,
+                    response: emailError.response
+                }, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
         catch (error) {
-            console.error("Error in newsletter service:", error);
-            throw new common_1.HttpException(`Newsletter service error: ${error.message}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+            console.error("\n=== Service Error ===");
+            console.error("Error:", error);
+            throw new common_1.HttpException({
+                message: "Newsletter service error",
+                error: error.message,
+                stack: error.stack
+            }, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     async getAllEmails(pageOptionsDto) {
@@ -92,10 +122,10 @@ let NewsletterService = class NewsletterService extends abstract_service_1.Abstr
         const subscriber = await queryBuilder.getOne();
         if (subscriber) {
             await this.newsletterEntityRepository.delete(subscriber.id);
-            return true;
+            return { message: "Successfully unsubscribed", email };
         }
         else {
-            throw new common_1.HttpException("Record not found", common_1.HttpStatus.NOT_FOUND);
+            throw new common_1.HttpException("Email not found", common_1.HttpStatus.NOT_FOUND);
         }
     }
 };

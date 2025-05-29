@@ -63,22 +63,45 @@ let AuthService = class AuthService {
             console.log(`Generated OTP for user ${data.userId}: ${otp} (remove in production)`);
             await this.userService.updateOTP(data.user.id, otp);
             try {
-                await this.mailerService.sendMail({
+                console.log('Attempting to send OTP email to:', data.user.email);
+                const emailContent = {
                     to: data.user.email,
-                    from: `"noreply" <${process.env.MAIL_FROM || 'hello@hoc.com'}>`,
-                    subject: "Home Owners Club - Your OTP Code",
-                    text: `Your OTP code is: ${otp}\n\nPlease use this code to complete your login.`,
-                });
-                console.log(`OTP email sent to ${data.user.email}`);
+                    from: '"Home Owners Club" <hello@hoc.com>',
+                    subject: "Your Login OTP Code - Home Owners Club",
+                    text: `Your OTP code is: ${otp}\n\nPlease use this code to complete your login.\n\nThis code will expire soon, please use it immediately.`,
+                    html: `
+            <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
+              <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h2 style="color: #333; text-align: center;">Home Owners Club</h2>
+                <h3 style="color: #444; text-align: center;">Your Login OTP Code</h3>
+                <div style="text-align: center; padding: 20px; background-color: #f8f8f8; border-radius: 5px; margin: 20px 0;">
+                  <h1 style="color: #2c3e50; font-size: 32px; margin: 0; letter-spacing: 5px;">${otp}</h1>
+                </div>
+                <p style="color: #666; text-align: center;">Please use this code to complete your login.</p>
+                <p style="color: #888; font-size: 12px; text-align: center; margin-top: 20px;">This code will expire soon, please use it immediately.</p>
+                <p style="color: #888; font-size: 12px; text-align: center;">If you didn't request this code, please ignore this email.</p>
+              </div>
+            </div>
+          `
+                };
+                const result = await this.mailerService.sendMail(emailContent);
+                console.log('OTP email sent successfully:', result);
+                return token;
             }
             catch (error) {
                 console.error('Failed to send OTP email:', error);
+                throw new common_1.HttpException({
+                    message: 'Failed to send OTP email',
+                    error: error.message
+                }, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            return token;
         }
         catch (error) {
             console.error('Error in createAccessTokenOTP:', error);
-            throw error;
+            throw new common_1.HttpException({
+                message: 'Error creating access token OTP',
+                error: error.message
+            }, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     async validateUser(userLoginDto) {

@@ -2,8 +2,9 @@ import { Order } from '../../constants';
 import {
   EnumFieldOptional,
   NumberFieldOptional,
-  StringFieldOptional,
 } from '../../decorators';
+import { IsOptional, IsString } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class PageOptionsDto {
   @EnumFieldOptional(() => Order, {
@@ -30,6 +31,11 @@ export class PageOptionsDto {
     return (this.page - 1) * this.take;
   }
 
-  @StringFieldOptional()
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional({
+    description: 'Search query string',
+    type: String,
+  })
   readonly q?: string;
 }

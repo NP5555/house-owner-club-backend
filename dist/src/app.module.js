@@ -105,7 +105,7 @@ AppModule = __decorate([
             }),
             nestjs_i18n_1.I18nModule.forRootAsync({
                 useFactory: (configService) => {
-                    const isCloudPlatform = process.env.RENDER || process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME;
+                    const isCloudPlatform = process.env.RENDER;
                     let i18nPath;
                     if (configService.nodeEnv === 'production') {
                         i18nPath = isCloudPlatform
@@ -152,12 +152,6 @@ AppModule = __decorate([
             serve_static_1.ServeStaticModule.forRoot({
                 rootPath: (0, path_2.join)(__dirname, '..', 'public'),
                 exclude: ['/api*'],
-                serveRoot: '/active',
-            }),
-            serve_static_1.ServeStaticModule.forRoot({
-                rootPath: (0, path_2.join)(__dirname, '..', 'public'),
-                exclude: ['/api*'],
-                serveRoot: '/',
             }),
         ],
         providers: [],

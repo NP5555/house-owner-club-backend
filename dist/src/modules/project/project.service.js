@@ -48,6 +48,33 @@ let ProjectService = class ProjectService extends abstract_service_1.AbstractSer
             throw new common_1.HttpException("Failed to load data", common_1.HttpStatus.NOT_FOUND);
         }
     }
+    async findAllPublicProjects(pageOptionsDto) {
+        const queryBuilder = this.projectEntityRepository.createQueryBuilder("project");
+        queryBuilder.leftJoinAndSelect("project.category", "category");
+        queryBuilder.leftJoinAndSelect("project.currency", "currency");
+        queryBuilder.where("project.status = :status", { status: 'OPEN' });
+        if (pageOptionsDto) {
+            if (!!pageOptionsDto.q) {
+                queryBuilder.andWhere("project.name like :search", {
+                    search: `%${pageOptionsDto.q}%`,
+                });
+            }
+            if (!!pageOptionsDto.order) {
+                queryBuilder.orderBy("project.createdAt", pageOptionsDto.order);
+            }
+            const [items, pageMetaDto] = await queryBuilder.paginate(pageOptionsDto);
+            if (items.length > 0) {
+                return items.toPageDto(pageMetaDto);
+            }
+            else {
+                return { data: [], meta: pageMetaDto };
+            }
+        }
+        else {
+            const items = await queryBuilder.getMany();
+            return items.map(item => item.toDto());
+        }
+    }
     async findAllByDeveloperId(developerId, pageOptionsDto) {
         const queryBuilder = this.projectEntityRepository.createQueryBuilder("project");
         queryBuilder.leftJoinAndSelect("project.category", "category");

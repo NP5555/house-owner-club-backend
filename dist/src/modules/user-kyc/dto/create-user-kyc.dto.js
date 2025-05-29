@@ -30,7 +30,7 @@ __decorate([
     __metadata("design:type", String)
 ], CreateUserKYCDto.prototype, "address", void 0);
 __decorate([
-    (0, decorators_1.StringField)(),
+    (0, decorators_1.StringField)({ required: false }),
     __metadata("design:type", String)
 ], CreateUserKYCDto.prototype, "street", void 0);
 __decorate([
@@ -46,7 +46,7 @@ __decorate([
     __metadata("design:type", String)
 ], CreateUserKYCDto.prototype, "mobileNumber", void 0);
 __decorate([
-    (0, decorators_1.StringField)(),
+    (0, decorators_1.StringFieldOptional)(),
     __metadata("design:type", String)
 ], CreateUserKYCDto.prototype, "company", void 0);
 __decorate([
@@ -54,7 +54,7 @@ __decorate([
     __metadata("design:type", String)
 ], CreateUserKYCDto.prototype, "pubkey", void 0);
 __decorate([
-    (0, decorators_1.StringField)(),
+    (0, decorators_1.StringField)({ required: false }),
     __metadata("design:type", String)
 ], CreateUserKYCDto.prototype, "certificates", void 0);
 __decorate([
