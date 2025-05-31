@@ -14,6 +14,8 @@ export class CategoryEntity extends AbstractEntity<CategoryDto> {
   @Column()
   description: string;
 
-  @OneToMany(() => ProjectEntity, (projectEn) => projectEn.category)
+  @OneToMany(() => ProjectEntity, (projectEn) => projectEn.category, {
+    onDelete: 'SET NULL'
+  })
   projects: ProjectEntity[];
 }

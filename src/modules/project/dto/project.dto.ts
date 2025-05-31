@@ -25,8 +25,8 @@ export class ProjectDto extends AbstractDto {
   @ApiProperty({ enum: ProjectStatus })
   status: ProjectStatus;
 
-  @ApiProperty()
-  categoryId: Uuid;
+  @ApiProperty({ required: false })
+  categoryId?: Uuid;
 
   @ApiProperty()
   currencyId: Uuid;

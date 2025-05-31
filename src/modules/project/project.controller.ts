@@ -11,6 +11,7 @@ import {
   Res,
   ValidationPipe,
   HttpException,
+  Req,
 } from "@nestjs/common";
 import { ProjectService } from "./project.service";
 import { Auth, UUIDParam } from "../../decorators";
@@ -144,39 +145,104 @@ export class ProjectController {
     @Query(new ValidationPipe({ transform: true }))
     pageOptionsDto: PageOptionsDto,
     @Query("developerId") developerId: string,
+    @Req() req: any,
     @Res() res: any
   ): Promise<PageDto<ProjectDto>> {
-    if (!developerId || developerId === 'undefined') {
-      return res.status(HttpStatus.BAD_REQUEST).json({
-        status: HttpStatus.BAD_REQUEST,
-        message: "Developer ID is required",
-        error: "Missing developerId parameter"
-      });
-    }
-
     try {
-      const tradeLands = await this.service.findAllByDeveloperId(
-        developerId,
+      // Get developer ID from query or authenticated user
+      let effectiveDeveloperId = developerId;
+      
+      // Clean up the developerId - handle 'undefined' string and empty string
+      if (!effectiveDeveloperId || effectiveDeveloperId === 'undefined' || effectiveDeveloperId.trim() === '') {
+        // Try to get from authenticated user
+        if (req.user && req.user.id) {
+          effectiveDeveloperId = req.user.id;
+          console.log('Using developer ID from authenticated user:', effectiveDeveloperId);
+        } else {
+          console.log('No developer ID found in request or user context');
+          return res.status(HttpStatus.BAD_REQUEST).json({
+            status: HttpStatus.BAD_REQUEST,
+            message: "Developer ID is required",
+            error: "No developer ID found in request or user context",
+            data: {
+              data: [],
+              meta: {
+                totalItems: 0,
+                itemCount: 0,
+                itemsPerPage: pageOptionsDto.take,
+                totalPages: 0,
+                currentPage: pageOptionsDto.page
+              }
+            }
+          });
+        }
+      }
+
+      console.log('Fetching projects for developer:', effectiveDeveloperId);
+      const projects = await this.service.findAllByDeveloperId(
+        effectiveDeveloperId,
         pageOptionsDto
       );
-      res.status(HttpStatus.OK).json({
+      
+      // If no projects found, return empty array with pagination
+      if (!projects || !projects.data || projects.data.length === 0) {
+        return res.status(HttpStatus.OK).json({
+          status: HttpStatus.OK,
+          message: "No projects found",
+          data: {
+            data: [],
+            meta: {
+              totalItems: 0,
+              itemCount: 0,
+              itemsPerPage: pageOptionsDto.take,
+              totalPages: 0,
+              currentPage: pageOptionsDto.page
+            }
+          }
+        });
+      }
+
+      // Return found projects
+      return res.status(HttpStatus.OK).json({
         status: HttpStatus.OK,
         message: "Records Found",
-        data: tradeLands,
+        data: projects
       });
-      return tradeLands;
     } catch (error) {
+      console.error('Error in findByUserId:', error);
+      
       if (error instanceof HttpException) {
         return res.status(error.getStatus()).json({
           status: error.getStatus(),
           message: error.message,
-          error: error.name
+          error: error.name,
+          data: {
+            data: [],
+            meta: {
+              totalItems: 0,
+              itemCount: 0,
+              itemsPerPage: pageOptionsDto.take,
+              totalPages: 0,
+              currentPage: pageOptionsDto.page
+            }
+          }
         });
       }
+      
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: "Internal server error",
-        error: error.message
+        error: error.message,
+        data: {
+          data: [],
+          meta: {
+            totalItems: 0,
+            itemCount: 0,
+            itemsPerPage: pageOptionsDto.take,
+            totalPages: 0,
+            currentPage: pageOptionsDto.page
+          }
+        }
       });
     }
   }

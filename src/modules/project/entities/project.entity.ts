@@ -36,7 +36,7 @@ export class ProjectEntity extends AbstractEntity<ProjectDto> {
   @Column()
   saleAddress: string;
 
-  @Column({ type: "uuid" })
+  @Column({ type: "uuid", nullable: true })
   categoryId: Uuid;
 
   @Column({ type: "uuid" })
@@ -45,7 +45,10 @@ export class ProjectEntity extends AbstractEntity<ProjectDto> {
   @Column({ type: "uuid" })
   developerId: Uuid;
 
-  @ManyToOne(() => CategoryEntity, (category) => category.projects)
+  @ManyToOne(() => CategoryEntity, (category) => category.projects, {
+    onDelete: 'SET NULL',
+    nullable: true
+  })
   @JoinColumn({ name: "category_id" })
   category: CategoryEntity;
 
